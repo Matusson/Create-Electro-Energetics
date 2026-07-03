@@ -53,7 +53,7 @@ public class EnergyMeterDevice extends SimpleElectricalDevice {
         v3s = results.getVoltages(new InWorldNode(3, pos), v3s);
         double power = 0;
 
-        int length = Math.min(v0s.length, Math.min(v1s.length, v2s.length));
+        int length = Math.min(Math.min(v0s.length, Math.min(v1s.length, v2s.length)), v3s.length);
 
         for (int i = 0; i < length; i++) {
 
