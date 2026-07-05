@@ -7,11 +7,13 @@ import com.george_vi.electroenergetics.CEESimulatedDevices;
 import com.george_vi.electroenergetics.foundation.CEELang;
 import com.george_vi.electroenergetics.foundation.base.SimpleElectricalDeviceBlock;
 import com.george_vi.electroenergetics.devices.device.SimulatedDeviceType;
+import com.george_vi.electroenergetics.foundation.redstone.DirectionalAnalogOutputBlock;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -33,7 +35,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class SynchroscopeBlock extends SimpleElectricalDeviceBlock<SynchroscopeDevice> implements IWrenchable, IBE<SynchroscopeBlockEntity>, ProperWaterloggedBlock {
+public class SynchroscopeBlock extends SimpleElectricalDeviceBlock<SynchroscopeDevice> implements IWrenchable, IBE<SynchroscopeBlockEntity>, ProperWaterloggedBlock, DirectionalAnalogOutputBlock {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
@@ -83,6 +85,29 @@ public class SynchroscopeBlock extends SimpleElectricalDeviceBlock<SynchroscopeD
     protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof SynchroscopeBlockEntity be)
             return Mth.clamp(be.redstoneSignal, 0, 15);
+        return 0;
+    }
+
+    @Override
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction dir) {
+        if (level.getBlockEntity(pos) instanceof SynchroscopeBlockEntity be) {
+            Direction facing = state.getValue(FACING);
+            Axis facingAxis = facing.getAxis();
+
+            Direction side = dir.getOpposite();
+            Axis sideAxis = side.getAxis();
+
+            int signal;
+            if (sideAxis.isVertical() || sideAxis == facingAxis) {
+                signal = be.redstoneSignal;
+            } else if (side == facing.getClockWise()) {
+                signal = be.cwRedstoneSignal;
+            } else { // counterclockwise
+                signal = be.ccwRedstoneSignal;
+            }
+
+            return Mth.clamp(signal, 0, 15);
+        }
         return 0;
     }
 
