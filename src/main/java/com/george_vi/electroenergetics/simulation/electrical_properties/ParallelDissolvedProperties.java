@@ -1,22 +1,20 @@
 package com.george_vi.electroenergetics.simulation.electrical_properties;
 
-import com.george_vi.electroenergetics.simulation.WrappedIndexedNode;
-
-import java.util.List;
+import java.util.Arrays;
 
 public class ParallelDissolvedProperties extends ElectricalProperties implements IDissolvedProperties {
-    public final List<ElectricalProperties> originalResistances;
-    public final WrappedIndexedNode node1;
-    public final WrappedIndexedNode node2;
+    public final ElectricalProperties[] originalProperties;
+    public final int node1;
+    public final int node2;
+    private final double resistance;
 
-    public ParallelDissolvedProperties(List<ElectricalProperties> originalResistances,
-                                       WrappedIndexedNode node1, WrappedIndexedNode node2) {
-        super(1, 0, 0);
+    public ParallelDissolvedProperties(ElectricalProperties[] originalProperties,
+                                       int node1, int node2) {
         this.node1 = node1;
         this.node2 = node2;
-        double conductance = originalResistances.stream().mapToDouble(ElectricalProperties::conductance).sum();
+        double conductance = Arrays.stream(originalProperties).mapToDouble(ElectricalProperties::conductance).sum();
         this.resistance = conductance == 0 ? 1e+11d : 1 / conductance;
-        this.originalResistances = originalResistances;
+        this.originalProperties = originalProperties;
     }
 
     @Override
@@ -25,7 +23,12 @@ public class ParallelDissolvedProperties extends ElectricalProperties implements
     }
 
     @Override
-    public ElectricalProperties invert() {
-        return this;
+    public double resistance() {
+        return resistance;
+    }
+
+    @Override
+    public boolean isSimpleResistor() {
+        return true;
     }
 }

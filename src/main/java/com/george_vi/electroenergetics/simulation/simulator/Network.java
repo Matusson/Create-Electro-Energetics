@@ -22,6 +22,7 @@ public class Network {
     final InfrastructureSavedData sd;
     final Long2DoubleMap voltageSources = new Long2DoubleOpenHashMap();
     final Long2DoubleMap currentSources = new Long2DoubleOpenHashMap();
+    final Long2ObjectMap<ElectricalProperties> simulationMicroTicked = new Long2ObjectOpenHashMap<>();
     final Long2ObjectMap<ElectricalProperties> microTicked = new Long2ObjectOpenHashMap<>();
     Object2IntOpenHashMap<WrappedIndexedNode> nodeIDs;
     SimulationNode[] simulationNodes;
@@ -31,14 +32,19 @@ public class Network {
     List<CoupledProperties> coupledProperties;
 
     Deque<TopologyOptimizationEntry> optimizations = new ArrayDeque<>();
+    private final int[] originalNodeIDs;
 
     public Network(Collection<WrappedIndexedNode> allNodes, CircuitBuilder builder, InfrastructureSavedData sd) {
+        originalNodeIDs = new int[allNodes.size()];
+        int i = 0;
+        for (WrappedIndexedNode node : allNodes)
+            originalNodeIDs[i++] = node.ordinal;
         this.allNodes = new HashSet<>(allNodes);
         this.builder = builder;
         this.sd = sd;
     }
 
-    public SimulationNode[] mapToSimNodes() {
+    public void mapToSimNodes() {
         simulationNodes = new SimulationNode[allNodes.size()];
         nodeIDs = new Object2IntOpenHashMap<>(allNodes.size(), 0.999f);
         coupledProperties = new ArrayList<>();
@@ -74,9 +80,10 @@ public class Network {
                 int adjacentID = nodeIDs.getInt(adjacentNode);
                 simulationNode.adjacentIDs[j] = adjacentID;
                 simulationNode.adjacentProperties[j] = connectionProperties;
-                if (connectionProperties instanceof MicroTickingElectricalProperties)
+                if (connectionProperties instanceof MicroTickingElectricalProperties) {
                     microTicked.put(DataPacker.pack(i, adjacentID), connectionProperties);
-                else if (simulationNode.id > adjacentID && connectionProperties instanceof CoupledProperties cp && cp.isPrimary())
+                    simulationMicroTicked.put(DataPacker.pack(simulationNode.correspondingNode.ordinal, adjacentNode.ordinal), connectionProperties);
+                } else if (simulationNode.id > adjacentID && connectionProperties instanceof CoupledProperties cp && cp.isPrimary())
                     coupledProperties.add(cp);
                 else if (!(connectionProperties instanceof MicroTickingInvertedElectricalProperties)) {
                     if ((connectionProperties.isVoltageSource()) && i > adjacentID)
@@ -87,15 +94,13 @@ public class Network {
                 j++;
             }
         }
-
-        return simulationNodes;
     }
 
     public void optimize() {
-        for (int i = 0; i < 10000; i++) {
+        while (allNodes.size() > 10) {
             if (
-                    !seriesOptimize() &
-                    !starToDeltaOptimize())
+                !seriesOptimize() &
+                !starToDeltaOptimize())
                 break;
         }
     }
@@ -173,7 +178,7 @@ public class Network {
             adjacencyA.put(nb.ordinal, pab);
             adjacencyB.put(na.ordinal, pab);
         } else {
-            ParallelDissolvedProperties pdp = new ParallelDissolvedProperties(List.of(pab, existingAB), na, nb);
+            ParallelDissolvedProperties pdp = new ParallelDissolvedProperties(new ElectricalProperties[] {pab, existingAB}, na.ordinal, nb.ordinal);
             adjacencyA.put(nb.ordinal, pdp);
             adjacencyB.put(na.ordinal, pdp);
         }
@@ -183,7 +188,7 @@ public class Network {
             adjacencyB.put(nc.ordinal, pbc);
             adjacencyC.put(nb.ordinal, pbc);
         } else {
-            ParallelDissolvedProperties pdp = new ParallelDissolvedProperties(List.of(pbc, existingBC), nb, nc);
+            ParallelDissolvedProperties pdp = new ParallelDissolvedProperties(new ElectricalProperties[] {pbc, existingBC}, nb.ordinal, nc.ordinal);
             adjacencyB.put(nc.ordinal, pdp);
             adjacencyC.put(nb.ordinal, pdp);
         }
@@ -193,7 +198,7 @@ public class Network {
             adjacencyC.put(na.ordinal, pca);
             adjacencyA.put(nc.ordinal, pca);
         } else {
-            ParallelDissolvedProperties pdp = new ParallelDissolvedProperties(List.of(pca, existingCA), nc, na);
+            ParallelDissolvedProperties pdp = new ParallelDissolvedProperties(new ElectricalProperties[] {pca, existingCA}, nc.ordinal, na.ordinal);
             adjacencyC.put(na.ordinal, pdp);
             adjacencyA.put(nc.ordinal, pdp);
         }
@@ -210,23 +215,27 @@ public class Network {
 
     }
 
+    private static final byte TO_DISSOLVE = 1;
+    private static final byte DISSOLVED = 2;
     boolean seriesOptimize() {
         boolean result = false;
 
         List<WrappedIndexedNode> toDissolve = new ArrayList<>();
         for (WrappedIndexedNode node : allNodes) {
-            node.isDissolved = false;
+            node.dissolveState = 0;
             double groundConductance = node.groundConductance;
             Int2ObjectMap<ElectricalProperties> nodeAdjacency = getAdjacency(node);
-            if (nodeAdjacency.size() == 2 && groundConductance == 0) {
+            if (nodeAdjacency.size() == 2 && groundConductance <= 0) {
                 Iterator<ElectricalProperties> it = nodeAdjacency.values().iterator();
-                if (it.next().isSimpleResistor() && it.next().isSimpleResistor())
+                if (it.next().canDissolve() && it.next().canDissolve()) {
                     toDissolve.add(node);
+                    node.dissolveState = TO_DISSOLVE;
+                }
             }
         }
 
         for (WrappedIndexedNode node : toDissolve) {
-            if (node.isDissolved)
+            if (node.dissolveState != TO_DISSOLVE)
                 continue;
 
             IntSet connections = getAdjacency(node).keySet();
@@ -241,23 +250,27 @@ public class Network {
             nodeChain.add(prevNode);
             nodeChain.add(node);
             nodeChain.add(nextNode);
-            prevNode.isDissolved = true;
-            node.isDissolved = true;
-            nextNode.isDissolved = true;
+            node.dissolveState = DISSOLVED;
             Deque<ElectricalProperties> resistanceChain = new ArrayDeque<>();
             resistanceChain.add(getAdjacency(prevNode).get(node.ordinal));
-            resistanceChain.add(getAdjacency(nextNode).get(node.ordinal));
+            resistanceChain.add(getAdjacency(node).get(nextNode.ordinal));
+
+            boolean purelyResistive =
+                    resistanceChain.getFirst().isSimpleResistor() &&
+                    resistanceChain.getLast().isSimpleResistor();
 
             // If 2 connections are merged into one and there is another connection in place,
             // create a new connection that contains the old & new connections.
             // also it can be assumed the series chain ends here, as a non-series connection appeared.
             ElectricalProperties propertiesInPlace = getAdjacency(prevNode).get(nextNode.ordinal);
             if (propertiesInPlace != null) {
+                nextNode.dissolveState = DISSOLVED;
+                prevNode.dissolveState = DISSOLVED;
 
                 // If that connection is a transformer, and it is the only one, completely dissolve it.
                 if (propertiesInPlace instanceof CoupledProperties cp) {
                     if (getAdjacency(prevNode).size() != 2 ||
-                            getAdjacency(nextNode).size() != 2)
+                            getAdjacency(nextNode).size() != 2 || !purelyResistive)
                         continue;
 
                     WrappedIndexedNode primaryLeft;
@@ -275,8 +288,8 @@ public class Network {
                         primaryRight = builder.getNode(cp.coupledNodes().node1());
                     }
 
-                    double leftResistance = resistanceChain.getFirst().resistance;
-                    double rightResistance = resistanceChain.getLast().resistance;
+                    double leftResistance = resistanceChain.getFirst().resistance();
+                    double rightResistance = resistanceChain.getLast().resistance();
 
                     double ratio = cp.isPrimary() ? cp.ratio() : 1 / cp.ratio();
                     double secondaryResistance = leftResistance + rightResistance;
@@ -303,7 +316,7 @@ public class Network {
                     continue;
                 }
 
-                if (!propertiesInPlace.isSimpleResistor())
+                if (!propertiesInPlace.canDissolve())
                     continue;
                 Int2ObjectMap<ElectricalProperties> prevAdjacency = overrideAdjacency(prevNode);
                 Int2ObjectMap<ElectricalProperties> nextAdjacency = overrideAdjacency(nextNode);
@@ -311,11 +324,17 @@ public class Network {
                 nextAdjacency.remove(node.ordinal);
                 overrideAdjacency(node).clear();
                 allNodes.remove(node);
-
-                DissolvedProperties dp = new DissolvedProperties(nodeChain, resistanceChain);
-                ParallelDissolvedProperties pdp = new ParallelDissolvedProperties(List.of(dp, propertiesInPlace), prevNode, nextNode);
-                prevAdjacency.put(nextNode.ordinal, pdp);
-                nextAdjacency.put(prevNode.ordinal, pdp);
+                IDissolvedProperties dp = purelyResistive ? new DissolvedProperties(nodeChain, resistanceChain) :
+                        new AdvancedDissolvedProperties(nodeChain, resistanceChain);
+                IDissolvedProperties pdp = purelyResistive && propertiesInPlace.isSimpleResistor() ?
+                        new ParallelDissolvedProperties(
+                                new ElectricalProperties[] {(ElectricalProperties)dp, propertiesInPlace},
+                                prevNode.ordinal, nextNode.ordinal) :
+                        new AdvancedParallelDissolvedProperties(
+                                new ElectricalProperties[] {(ElectricalProperties)dp, propertiesInPlace},
+                                prevNode.ordinal, nextNode.ordinal);
+                prevAdjacency.put(nextNode.ordinal, (ElectricalProperties) pdp);
+                nextAdjacency.put(prevNode.ordinal, ((ElectricalProperties) pdp).invert());
 
                 optimizations.push(new SimpleTopologyOptimizationEntry(dp, prevNode.ordinal, nextNode.ordinal));
                 result = true;
@@ -325,7 +344,7 @@ public class Network {
             WrappedIndexedNode leftNode = prevNode;
             WrappedIndexedNode prevLeftNode = node;
             while (true) {
-                if (leftNode.isDissolved || !toDissolve.contains(leftNode))
+                if (leftNode.dissolveState != TO_DISSOLVE)
                     break;
                 IntSet leftConnections = getAdjacency(leftNode).keySet();
                 if (leftConnections.size() != 2)
@@ -339,14 +358,17 @@ public class Network {
                 prevLeftNode = leftNode;
                 leftNode = newLeftNode;
                 nodeChain.addFirst(leftNode);
-                leftNode.isDissolved = true;
-                resistanceChain.addFirst(getAdjacency(leftNode).get(prevLeftNode.ordinal));
+                leftNode.dissolveState = DISSOLVED;
+                ElectricalProperties p = getAdjacency(leftNode).get(prevLeftNode.ordinal);
+                resistanceChain.addFirst(p);
+                if (!p.isSimpleResistor())
+                    purelyResistive = false;
             }
 
             WrappedIndexedNode rightNode = nextNode;
             WrappedIndexedNode prevRightNode = node;
             while (true) {
-                if (rightNode.isDissolved || !toDissolve.contains(rightNode))
+                if (rightNode.dissolveState != TO_DISSOLVE)
                     break;
                 IntSet rightConnections = getAdjacency(rightNode).keySet();
                 if (rightConnections.size() != 2)
@@ -360,17 +382,21 @@ public class Network {
                 prevRightNode = rightNode;
                 rightNode = newRightNode;
                 nodeChain.addLast(rightNode);
-                rightNode.isDissolved = true;
-                resistanceChain.addLast(getAdjacency(rightNode).get(prevRightNode.ordinal));
+                rightNode.dissolveState = DISSOLVED;
+                ElectricalProperties p = getAdjacency(prevRightNode).get(rightNode.ordinal);
+                resistanceChain.addLast(p);
+                if (!p.isSimpleResistor())
+                    purelyResistive = false;
             }
             result = true;
-            DissolvedProperties p = new DissolvedProperties(nodeChain, resistanceChain);
+            IDissolvedProperties p = purelyResistive ? new DissolvedProperties(nodeChain, resistanceChain) :
+                    new AdvancedDissolvedProperties(nodeChain, resistanceChain);
             Int2ObjectMap<ElectricalProperties> leftAdjacency = overrideAdjacency(leftNode);
             Int2ObjectMap<ElectricalProperties> rightAdjacency = overrideAdjacency(rightNode);
             leftAdjacency.remove(prevLeftNode.ordinal);
             rightAdjacency.remove(prevRightNode.ordinal);
-            leftAdjacency.put(rightNode.ordinal, p);
-            rightAdjacency.put(leftNode.ordinal, p);
+            leftAdjacency.put(rightNode.ordinal, ((ElectricalProperties) p));
+            rightAdjacency.put(leftNode.ordinal, ((ElectricalProperties) p).invert());
 
             // remove the nodes in the middle of the node chain
             int i = 0;
@@ -412,13 +438,14 @@ public class Network {
             if (entry.getValue().isVoltageSource())
                 microVoltageSources.add(new LongDoubleImmutablePair(entry.getLongKey(), entry.getValue().voltageSource()));
             if (entry.getValue().isCurrentSource())
-                microCurrentSources.add(new LongDoubleImmutablePair(entry.getLongKey(), entry.getValue().currentSource));
+                microCurrentSources.add(new LongDoubleImmutablePair(entry.getLongKey(), entry.getValue().currentSource()));
         }
 
         int size = simulationNodes.length + voltageSources.size() + microVoltageSources.size() + (coupledProperties.size() * 2);
 
         conductanceMatrix = new SparseMatrix(size);
 
+        boolean fakeGround = false;
         for (SimulationNode node : simulationNodes) {
             double totalConductance = 0;
             for (int i = 0; i < node.adjacentProperties.length; i++) {
@@ -430,9 +457,18 @@ public class Network {
                 conductanceMatrix.set(node.id, node.adjacentIDs[i], -conductance);
                 conductanceMatrix.set(node.adjacentIDs[i], node.id, -conductance);
             }
-            totalConductance += node.correspondingNode.groundConductance;
+            double groundConductance = Math.abs(node.correspondingNode.groundConductance);
+            if (groundConductance != 0) {
+                totalConductance += groundConductance;
+                fakeGround = true;
+            }
             conductanceMatrix.set(node.id, node.id, totalConductance);
 //            conductanceMatrix[node.id][node.id] = totalConductance;
+        }
+
+        if (!fakeGround) {
+            conductanceMatrix.set(0, 0, conductanceMatrix.getValue(0, 0) + 1);
+            fakeGround = true;
         }
 
         rhsVector = new double[size];
@@ -440,15 +476,15 @@ public class Network {
         for (Long2DoubleMap.Entry e : currentSources.long2DoubleEntrySet()) {
             long packedConnection = e.getLongKey();
             double v = e.getDoubleValue();
-            rhsVector[DataPacker.unpackFirstI(packedConnection)] += -v;
-            rhsVector[DataPacker.unpackSecondI(packedConnection)] += v;
+            rhsVector[DataPacker.unpackFirstI(packedConnection)] += v;
+            rhsVector[DataPacker.unpackSecondI(packedConnection)] += -v;
         }
 
         for (LongDoublePair e : microCurrentSources) {
             long packedConnection = e.firstLong();
             double v = e.secondDouble();
-            rhsVector[DataPacker.unpackFirstI(packedConnection)] += -v;
-            rhsVector[DataPacker.unpackSecondI(packedConnection)] += v;
+            rhsVector[DataPacker.unpackFirstI(packedConnection)] += v;
+            rhsVector[DataPacker.unpackSecondI(packedConnection)] += -v;
         }
 
         int i = simulationNodes.length;
@@ -554,6 +590,21 @@ public class Network {
                 toFill[optimization.rightNode() * totalMicroTicks + microTick] = originVoltage + scaledVoltage;
             }
 
+        }
+
+        // todo
+        int offsetIndex = -1;
+        for (int id : originalNodeIDs) {
+            if (builder.getNode(id).groundConductance < 0) {
+                offsetIndex = id;
+            }
+        }
+
+        if (offsetIndex != -1) {
+            double offset = toFill[offsetIndex * totalMicroTicks + microTick];
+
+            for (int id : originalNodeIDs)
+                toFill[id * totalMicroTicks + microTick] -= offset;
         }
 
     }

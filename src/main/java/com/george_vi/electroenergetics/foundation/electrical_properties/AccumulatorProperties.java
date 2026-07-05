@@ -31,7 +31,7 @@ public class AccumulatorProperties extends MicroTickingElectricalProperties {
         double soc = soc();
         double sourceVoltage = baseOpenCircuitVoltage(soc) * cellVoltage;
 
-        currentSource = -sourceVoltage / internalResistance;
+        currentSource = sourceVoltage / internalResistance;
         resistance = internalResistance;
     }
 

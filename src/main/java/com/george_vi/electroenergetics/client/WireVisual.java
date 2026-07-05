@@ -121,6 +121,8 @@ public class WireVisual implements EffectVisual<WireEffect>, LightUpdatedVisual,
                     instance.delete();
                 instances.clear();
             }
+            startInstance.setVisible(false);
+            endInstance.setVisible(false);
             return;
         }
 
@@ -156,6 +158,7 @@ public class WireVisual implements EffectVisual<WireEffect>, LightUpdatedVisual,
         if (points.size() < 2) {
             startInstance.setVisible(false);
             endInstance.setVisible(false);
+            return;
         }
 
         Vec3 start = points.get(0);

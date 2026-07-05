@@ -756,10 +756,10 @@ public class InfrastructureSavedData extends SavedData {
 
     public void setConnectionData(long connection, WireData data) {
         InWorldNodeConnection nodeConnection = resolveConnection(connection);
-        wireSync.handleWireAdded(nodeConnection, data);
         wireSimulationState.removeConnection(nodeConnection);
         wireSimulationState.addConnection(nodeConnection, data, false);
         CONNECTION_DATA.put(connection, data);
+        wireSync.handleWireAdded(nodeConnection, data);
     }
 
     public InWorldNodeConnection resolveConnection(long connection) {

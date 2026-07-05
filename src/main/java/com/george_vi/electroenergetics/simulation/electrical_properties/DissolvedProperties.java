@@ -7,9 +7,10 @@ import java.util.Collection;
 public class DissolvedProperties extends ElectricalProperties implements IDissolvedProperties {
     private final int[] originalNodeIDs;
     private final double[] originalResistances;
+    private double resistance = 0;
+
 
     public DissolvedProperties(Collection<WrappedIndexedNode> originalNodes, Collection<ElectricalProperties> originalResistances) {
-        super(originalResistances.stream().mapToDouble(ElectricalProperties::resistance).sum(), 0, 0);
         this.originalNodeIDs = new int[originalNodes.size()];
         int i = 0;
         for (WrappedIndexedNode node : originalNodes)
@@ -17,8 +18,11 @@ public class DissolvedProperties extends ElectricalProperties implements IDissol
 
         this.originalResistances = new double[originalResistances.size()];
         i = 0;
-        for (ElectricalProperties properties : originalResistances)
-            this.originalResistances[i++] = properties.resistance;
+        for (ElectricalProperties properties : originalResistances) {
+            this.originalResistances[i++] = properties.resistance();
+            resistance += properties.resistance();
+        }
+
     }
 
     @Override
@@ -39,7 +43,12 @@ public class DissolvedProperties extends ElectricalProperties implements IDissol
     }
 
     @Override
-    public ElectricalProperties invert() {
-        return this;
+    public double resistance() {
+        return resistance;
+    }
+
+    @Override
+    public boolean isSimpleResistor() {
+        return true;
     }
 }

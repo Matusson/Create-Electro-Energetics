@@ -25,7 +25,7 @@ public class DiodeProperties extends MicroTickingElectricalProperties {
     }
 
     private void tickDiode(int totalMicroTicks) {
-        // Thanks, ChatGPT
+        // i vibecoded this
         double iS = 10e-10d;
         double vT = 0.050;
 
@@ -40,6 +40,6 @@ public class DiodeProperties extends MicroTickingElectricalProperties {
         double resistance = 1 / g;
         double currentSource = iS * (Math.exp(lastVoltage / vT) - 1) - g * lastVoltage;
         this.resistance = resistance;
-        this.currentSource = -currentSource - iEqCap;
+        this.currentSource = currentSource + iEqCap;
     }
 }

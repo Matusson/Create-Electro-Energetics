@@ -3,6 +3,7 @@ package com.george_vi.electroenergetics.simulation;
 import com.george_vi.electroenergetics.foundation.nodes.InWorldNode;
 import com.george_vi.electroenergetics.foundation.nodes.Node;
 import com.george_vi.electroenergetics.simulation.electrical_properties.ElectricalProperties;
+import com.george_vi.electroenergetics.simulation.electrical_properties.VoltageSourceProperties;
 import com.george_vi.electroenergetics.simulation.infrastructure.InfrastructureSavedData;
 import net.minecraft.core.BlockPos;
 
@@ -17,9 +18,8 @@ public class BridgeCollector {
         this.microTicks = microTicks;
     }
 
-
-    public void bridge(Node node1, Node node2, double resistance, double voltageSource, double currentSource) {
-        bridge(node1, node2, new ElectricalProperties(resistance, voltageSource, currentSource));
+    public void bridge(Node node1, Node node2, double resistance) {
+        bridge(node1, node2, ElectricalProperties.resistor(resistance));
     }
 
     public void bridge(Node node1, Node node2, ElectricalProperties electricalProperties) {
@@ -91,17 +91,12 @@ public class BridgeCollector {
         }
 
         public Builder idealVoltageSource(int n1, int n2, double voltage) {
-            collector.bridge(new InWorldNode(n1, pos), new InWorldNode(n2, pos), new ElectricalProperties(10e+11d, voltage, 0, true));
-            return this;
-        }
-
-        public Builder idealCurrentSource(int n1, int n2, double current) {
-            collector.bridge(new InWorldNode(n1, pos), new InWorldNode(n2, pos), new ElectricalProperties(10e+11d, 0, current, false));
+            collector.bridge(new InWorldNode(n1, pos), new InWorldNode(n2, pos), new VoltageSourceProperties(voltage));
             return this;
         }
 
         public Builder voltageSourceWithResistance(InWorldNode n1, InWorldNode n2, double resistance, double voltage) {
-            collector.bridge(n1, n2, ElectricalProperties.fromThevenin(resistance, voltage));
+            collector.bridge(n1, n2, ElectricalProperties.fromThevenin(resistance, -voltage));
             collector.defaultZeroPotential(voltage > 0 ? n1 : n2, 60);
             i++;
             return this;
@@ -124,14 +119,8 @@ public class BridgeCollector {
         }
 
         public Builder idealVoltageSource(InWorldNode n1, InWorldNode n2, double voltage) {
-            collector.bridge(n1, n2, new ElectricalProperties(10e+11d, voltage, 0, true));
+            collector.bridge(n1, n2, new VoltageSourceProperties(voltage));
             collector.defaultZeroPotential(voltage > 0 ? n1 : n2, 100);
-            return this;
-        }
-
-        public Builder idealCurrentSource(InWorldNode n1, InWorldNode n2, double current) {
-            collector.bridge(n1, n2, new ElectricalProperties(10e+11d, 0, current, false));
-            collector.defaultZeroPotential(current > 0 ? n1 : n2, 100);
             return this;
         }
 
@@ -146,7 +135,7 @@ public class BridgeCollector {
         }
 
         public Builder resistor(int n1, int n2, double resistance) {
-            collector.bridge(new InWorldNode(n1, pos), new InWorldNode(n2, pos), resistance, 0, 0);
+            collector.bridge(new InWorldNode(n1, pos), new InWorldNode(n2, pos), resistance);
             return this;
         }
 

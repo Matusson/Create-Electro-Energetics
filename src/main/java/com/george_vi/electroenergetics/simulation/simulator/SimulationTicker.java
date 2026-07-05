@@ -11,10 +11,14 @@ import com.george_vi.electroenergetics.foundation.nodes.DirectionalNodeConnectio
 import com.george_vi.electroenergetics.foundation.nodes.InWorldNode;
 import com.george_vi.electroenergetics.foundation.nodes.Node;
 import com.george_vi.electroenergetics.simulation.*;
+import com.george_vi.electroenergetics.simulation.electrical_properties.AdvancedDissolvedProperties;
 import com.george_vi.electroenergetics.simulation.electrical_properties.ElectricalProperties;
 import com.george_vi.electroenergetics.simulation.electrical_properties.MicroTickingElectricalProperties;
 import com.george_vi.electroenergetics.simulation.infrastructure.InfrastructureSavedData;
-import com.george_vi.electroenergetics.simulation.util.*;
+import com.george_vi.electroenergetics.simulation.util.CholeskySolver;
+import com.george_vi.electroenergetics.simulation.util.DataPacker;
+import com.george_vi.electroenergetics.simulation.util.LUSolver;
+import com.george_vi.electroenergetics.simulation.util.SimulatorProfiler;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
@@ -27,10 +31,11 @@ import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class SimulationTicker {
-
 
     public static SimulatorProfiler profiler = new SimulatorProfiler();
     public static Map<Level, SimulationStats> allStats = new Object2ObjectArrayMap<>();
@@ -53,14 +58,19 @@ public class SimulationTicker {
         this.sd = sd;
     }
 
-    static WorkerThread electricalWorkerThread;
+    private static ExecutorService electricalExecutorService;
 
     public static void runServer() {
-        electricalWorkerThread = new WorkerThread("CEE-Electrical-Simulator");
+        electricalExecutorService = Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r);
+            t.setName("CEE-Electrical-Simulator");
+            t.setDaemon(true);
+            return t;
+        });
     }
 
     public static void stopServer() {
-        electricalWorkerThread.shutdown();
+        electricalExecutorService.shutdownNow();
     }
 
     public void tick() {
@@ -112,7 +122,7 @@ public class SimulationTicker {
         List<ObjectDoublePair<DirectionalNodeConnection>> wiresToJoin = new ArrayList<>(sd.wireSimulationState.getLazyConnections());
 
         stats = new SimulationStats();
-        future = electricalWorkerThread.submit(() -> {
+        future = electricalExecutorService.submit(() -> {
             circuitBuilder.connectAll(wiresToJoin);
             List<List<WrappedIndexedNode>> networks = circuitBuilder.dfsAndGround();
             stats.totalNodes = circuitBuilder.allNodes().size();
@@ -166,10 +176,14 @@ public class SimulationTicker {
             long solveStart = System.nanoTime();
 
             for (int i = 0; i < microTicks; i++) {
-                for (Long2ObjectMap.Entry<MicroTickingElectricalProperties> entry : circuitBuilder.microTickers.long2ObjectEntrySet()) {
-                    int first = DataPacker.unpackFirstI(entry.getLongKey());
-                    int second = DataPacker.unpackSecondI(entry.getLongKey());
-                    entry.getValue().tick(allVoltages, i, microTicks, first, second);
+                for (Network network : allNetworks) {
+                    for (Long2ObjectMap.Entry<ElectricalProperties> entry : network.simulationMicroTicked.long2ObjectEntrySet()) {
+                        int first = DataPacker.unpackFirstI(entry.getLongKey());
+                        int second = DataPacker.unpackSecondI(entry.getLongKey());
+                        if (entry.getValue() instanceof MicroTickingElectricalProperties properties) {
+                            properties.tick(allVoltages, i, microTicks, first, second);
+                        }
+                    }
                 }
                 for (Network network : allNetworks) {
                     network.formMatrix();
@@ -193,12 +207,15 @@ public class SimulationTicker {
                         j++;
                     }
                 }
-                for (Long2ObjectMap.Entry<MicroTickingElectricalProperties> entry : circuitBuilder.microTickers.long2ObjectEntrySet()) {
-                    int first = DataPacker.unpackFirstI(entry.getLongKey());
-                    int second = DataPacker.unpackSecondI(entry.getLongKey());
-                    entry.getValue().afterTick(allVoltages, first, second, i, microTicks);
+                for (Network network : allNetworks) {
+                    for (Long2ObjectMap.Entry<ElectricalProperties> entry : network.simulationMicroTicked.long2ObjectEntrySet()) {
+                        int first = DataPacker.unpackFirstI(entry.getLongKey());
+                        int second = DataPacker.unpackSecondI(entry.getLongKey());
+                        if (entry.getValue() instanceof MicroTickingElectricalProperties properties) {
+                            properties.afterTick(allVoltages, first, second, i, microTicks);
+                        }
+                    }
                 }
-
             }
 
             Object2DoubleMap<DirectionalNodeConnection> allSourceAmps = new Object2DoubleOpenHashMap<>();

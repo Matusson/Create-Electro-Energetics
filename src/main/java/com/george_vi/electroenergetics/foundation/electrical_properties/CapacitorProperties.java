@@ -41,6 +41,6 @@ public class CapacitorProperties extends MicroTickingElectricalProperties {
         double historyCurrent = conductance * lastVoltage;
 
         this.resistance = 1 / conductance;
-        this.currentSource = -historyCurrent;
+        this.currentSource = historyCurrent;
     }
 }

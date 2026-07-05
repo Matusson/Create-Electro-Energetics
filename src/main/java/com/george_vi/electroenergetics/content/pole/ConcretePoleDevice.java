@@ -43,7 +43,7 @@ public class ConcretePoleDevice extends SimpleElectricalDevice {
             }
 
             if (length > 0)
-                bridges.bridge(new InWorldNode(0, pos), new InWorldNode(0, pos.above(length)), CEEConfigs.server().resistanceValues.wireResistance.get() * length, 0, 0);
+                bridges.bridge(new InWorldNode(0, pos), new InWorldNode(0, pos.above(length)), CEEConfigs.server().resistanceValues.wireResistance.get() * length);
         }
 
         if (top || bottom)

@@ -4,6 +4,7 @@ import com.george_vi.electroenergetics.content.creative_battery.CreativeBatteryB
 import com.george_vi.electroenergetics.foundation.CEELang;
 import com.george_vi.electroenergetics.foundation.scroll_value.ResistanceScrollValueBehaviour;
 import com.george_vi.electroenergetics.devices.device.DevicesSavedData;
+import com.george_vi.electroenergetics.simulation.electrical_properties.ElectricalProperties;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform;
@@ -43,7 +44,7 @@ public class ResistorBlockEntity extends SmartBlockEntity {
 
         ResistorDevice device = DevicesSavedData.load(sl).getDevice(worldPosition, ResistorDevice.class);
         if (device != null)
-            device.properties.resistance = resistance.getResistance();
+            device.properties = ElectricalProperties.resistor(resistance.getResistance());
 
     }
 

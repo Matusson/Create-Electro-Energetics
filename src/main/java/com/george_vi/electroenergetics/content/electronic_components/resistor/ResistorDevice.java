@@ -62,7 +62,7 @@ public class ResistorDevice extends SimpleElectricalDevice {
 
     @Override
     public void write(CompoundTag tag) {
-        tag.putDouble("Resistance", this.properties.resistance);
+        tag.putDouble("Resistance", this.properties.resistance());
         tag.putFloat("Temp", this.temp);
         if (oilLogged)
             tag.putBoolean("OilLogged", true);

@@ -22,6 +22,7 @@ import com.george_vi.electroenergetics.simulation.infrastructure.WireData;
 import com.george_vi.electroenergetics.simulation.infrastructure.detached_nodes.DetachedNodeHelper;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllSpecialTextures;
+import dev.ryanhcode.sable.companion.SableCompanion;
 import net.createmod.catnip.data.Pair;
 import net.createmod.catnip.lang.FontHelper;
 import net.createmod.catnip.outliner.Outliner;
@@ -32,6 +33,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -157,7 +159,6 @@ public class WireApplyingBehaviour {
         // hovered node
         InWorldNode hoveredNode = InWorldNode.getHitNode(result, level);
 
-
         if (hoveredNode == null) {
             targetingDetachedNode = null;
             ElectricPropertiesOverlay.INSTANCE.removeHoveredNode();
@@ -170,6 +171,8 @@ public class WireApplyingBehaviour {
 
         if (DetachedNodeHelper.isDetached(hoveredNode))
             targetingDetachedNode = hoveredNode;
+        else
+            targetingDetachedNode = null;
 
         Vec3 hoveredNodePos = null;
         float nodeSize = 4/16f;
@@ -179,6 +182,10 @@ public class WireApplyingBehaviour {
         }
 
         hoveredNodePos = hoveredNode.toGlobalPosNoSable(hoveredNodePos, level);
+        double playerRange = mc.player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE);
+        if (SableCompanion.INSTANCE.distanceSquaredWithSubLevels(mc.level, hoveredNodePos, mc.player.getEyePosition()) > playerRange * playerRange)
+            hoveredNodePos = null;
+
         if (hoveredNodePos == null) {
             ElectricPropertiesOverlay.INSTANCE.removeHoveredNode();
             return;

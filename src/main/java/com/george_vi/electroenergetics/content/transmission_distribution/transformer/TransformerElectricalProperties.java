@@ -11,7 +11,6 @@ public class TransformerElectricalProperties extends ElectricalProperties implem
     final boolean isPrimary;
 
     private TransformerElectricalProperties(double ratio, DirectionalNodeConnection primaryNodes, DirectionalNodeConnection secondaryNodes, boolean isPrimary) {
-        super(1e+8d, 0, 0);
         this.primaryNodes = primaryNodes;
         this.secondaryNodes = secondaryNodes;
         this.ratio = ratio;
@@ -47,12 +46,12 @@ public class TransformerElectricalProperties extends ElectricalProperties implem
     }
 
     @Override
-    public boolean isSimpleResistor() {
-        return false;
+    public double resistance() {
+        return 1e+8d;
     }
 
     @Override
-    public ElectricalProperties invert() {
-        return this;
+    public boolean canDissolve() {
+        return false;
     }
 }

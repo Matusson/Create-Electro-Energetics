@@ -6,6 +6,7 @@ import com.george_vi.electroenergetics.foundation.nodes.Node;
 import com.george_vi.electroenergetics.simulation.electrical_properties.CoupledProperties;
 import com.george_vi.electroenergetics.simulation.electrical_properties.ElectricalProperties;
 import com.george_vi.electroenergetics.simulation.electrical_properties.MicroTickingElectricalProperties;
+import com.george_vi.electroenergetics.simulation.electrical_properties.ResistorProperties;
 import com.george_vi.electroenergetics.simulation.util.DataPacker;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
@@ -64,7 +65,7 @@ public class CircuitBuilder {
         int nodeId1 = nodeIndexes.getInt(n1);
         int nodeId2 = nodeIndexes.getInt(n2);
         if (nodeId1 == -1 || nodeId2 == -1)
-            return ElectricalProperties.ZERO_CONDUCTANCE;
+            return ResistorProperties.ZERO_CONDUCTANCE;
         return getConnectionProperties(nodeId1, nodeId2);
     }
 
@@ -207,7 +208,7 @@ public class CircuitBuilder {
                 }
             }
             if (highestPriorityGround != null)
-                highestPriorityGround.groundConductance = 1000d;
+                highestPriorityGround.groundConductance = -1000d;
         }
 
         allNetworks.clear();

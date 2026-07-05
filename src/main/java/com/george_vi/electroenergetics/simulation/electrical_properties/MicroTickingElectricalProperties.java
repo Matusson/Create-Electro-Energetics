@@ -6,8 +6,11 @@ package com.george_vi.electroenergetics.simulation.electrical_properties;
  */
 public abstract class MicroTickingElectricalProperties extends ElectricalProperties {
     MicroTickingInvertedElectricalProperties inverted = null;
+    public double resistance;
+    public double currentSource;
+    public double voltageSource;
+
     public MicroTickingElectricalProperties() {
-        super(1, 0, 0);
     }
 
     public abstract void tick(double[] allVoltages, int microTick, int totalMicroTicks, int n1, int n2);
@@ -22,17 +25,32 @@ public abstract class MicroTickingElectricalProperties extends ElectricalPropert
     }
 
     @Override
-    public int hashCode() {
-        return System.identityHashCode(this);
+    public double resistance() {
+        return resistance;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj == this;
+    public double currentSource() {
+        return currentSource;
     }
 
     @Override
-    public ElectricalProperties invert() {
+    public boolean isCurrentSource() {
+        return currentSource != 0;
+    }
+
+    @Override
+    public double voltageSource() {
+        return voltageSource;
+    }
+
+    @Override
+    public boolean isVoltageSource() {
+        return voltageSource != 0;
+    }
+
+    @Override
+    public final ElectricalProperties invert() {
         if (inverted == null)
             return inverted = new MicroTickingInvertedElectricalProperties(this);
         return inverted;

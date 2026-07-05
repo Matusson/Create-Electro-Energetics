@@ -177,8 +177,8 @@ public class ThreePhaseAlternatorBrushesDevice extends SimpleElectricalDevice {
         public void afterTick(double[] allVoltages, int n1, int n2, int microTick, int totalMicroTicks) {
             double angle = virtualRotor.angle + offset;
             double vd =
-                    allVoltages[n2 * totalMicroTicks + microTick] -
-                    allVoltages[n1 * totalMicroTicks + microTick];
+                    allVoltages[n1 * totalMicroTicks + microTick] -
+                    allVoltages[n2 * totalMicroTicks + microTick];
             double current = (v - vd) / this.resistance;
 
             double powerDelivered = Math.abs(current * vd);

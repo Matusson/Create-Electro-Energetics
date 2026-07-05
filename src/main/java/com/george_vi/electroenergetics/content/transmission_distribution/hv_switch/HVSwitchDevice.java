@@ -39,11 +39,11 @@ public class HVSwitchDevice extends SimpleElectricalDevice {
         }
 
         if (state == SwitchState.ARCING)
-            bridges.bridge(new InWorldNode(0, pos), new InWorldNode(0, target), 500, 0, 0);
+            bridges.bridge(new InWorldNode(0, pos), new InWorldNode(0, target), 500);
         else if (state == SwitchState.MOVING)
-            bridges.bridge(new InWorldNode(0, pos), new InWorldNode(0, target), airResistance < 1000 ? 1000 : airResistance, 0, 0);
+            bridges.bridge(new InWorldNode(0, pos), new InWorldNode(0, target), airResistance < 1000 ? 1000 : airResistance);
         else if (state == SwitchState.CONNECTED)
-            bridges.bridge(new InWorldNode(0, pos), new InWorldNode(0, target), 0.01, 0, 0);
+            bridges.bridge(new InWorldNode(0, pos), new InWorldNode(0, target), 0.01);
 
     }
 
