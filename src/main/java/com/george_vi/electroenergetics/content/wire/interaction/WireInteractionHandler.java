@@ -1,11 +1,11 @@
 package com.george_vi.electroenergetics.content.wire.interaction;
 
 import com.george_vi.electroenergetics.CEERegistries;
-import com.george_vi.electroenergetics.CEETags;
 import com.george_vi.electroenergetics.client.WireRenderer;
 import com.george_vi.electroenergetics.content.electrical_panel.ElectricalPanelBlock;
 import com.george_vi.electroenergetics.content.wire_spool.WireApplyingBehaviour;
 import com.george_vi.electroenergetics.foundation.QuadraticWireHelper;
+import com.george_vi.electroenergetics.foundation.RenderHelper;
 import com.george_vi.electroenergetics.foundation.nodes.InWorldNodeConnection;
 import com.george_vi.electroenergetics.foundation.nodes.NodeConnectionPoint;
 import com.george_vi.electroenergetics.simulation.infrastructure.WireData;
@@ -163,8 +163,10 @@ public class WireInteractionHandler {
         targetedPos = bestPosition;
         WireInteractionBehaviour.DisplayType displayType = behaviour.getWireDisplayType(targetedPoint, mc.level, mc.player, stackInHand);
         if (displayType == WireInteractionBehaviour.DisplayType.DOT) {
-            Outliner.getInstance()
-                    .chaseAABB("cee_wire_interaction_point", AABB.ofSize(bestPosition, 0.01, 0.01, 0.01))
+            pos1 = targetedPoint.node1().getPositionNoSable(mc.level);
+            pos2 = targetedPoint.node2().getPositionNoSable(mc.level);
+            RenderHelper.chaseAABBOnWire("cee_wire_interaction_point", AABB.ofSize(Vec3.ZERO, 0.01, 0.01, 0.01),
+                    pos1, pos2, targetedPoint.point(), bestWireData.getSag(bestWirePointDistance))
                     .lineWidth(0.15f)
                     .colored(behaviour.getWireDisplayColor(targetedPoint, mc.level, mc.player, stackInHand))
                     .disableLineNormals();
