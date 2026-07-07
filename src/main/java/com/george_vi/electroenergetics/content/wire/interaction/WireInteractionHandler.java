@@ -11,7 +11,7 @@ import com.george_vi.electroenergetics.foundation.nodes.NodeConnectionPoint;
 import com.george_vi.electroenergetics.simulation.infrastructure.WireData;
 import net.createmod.catnip.data.Pair;
 import net.createmod.catnip.math.VecHelper;
-import net.createmod.catnip.outliner.Outliner;
+import net.createmod.catnip.outliner.Outline;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -147,8 +147,8 @@ public class WireInteractionHandler {
         }
 
         targetedPoint = new NodeConnectionPoint(bestConnection.node1(), bestConnection.node2(), bestProgress);
-        Vec3 pos1 = targetedPoint.node1().getPosition(mc.level);
-        Vec3 pos2 = targetedPoint.node2().getPosition(mc.level);
+        Vec3 pos1 = targetedPoint.node1().getPositionNoSable(mc.level);
+        Vec3 pos2 = targetedPoint.node2().getPositionNoSable(mc.level);
 
         if (!behaviour.isActuallyActiveFor(targetedPoint, mc.level, mc.player, stackInHand)) {
             targetedPoint = null;
@@ -159,32 +159,22 @@ public class WireInteractionHandler {
         if (pos1 == null || pos2 == null)
             return;
 
-        bestPosition = QuadraticWireHelper.posAt(pos1, pos2, targetedPoint.point(), bestWireData.getSag(bestWirePointDistance));
-        targetedPos = bestPosition;
+        RenderHelper.Positions pos = new RenderHelper.Positions(pos1,pos2);
+
+        targetedPos = QuadraticWireHelper.posAt(pos.getPos1Sable(), pos.getPos2Sable(), bestWireData.getSag(bestWirePointDistance));
         WireInteractionBehaviour.DisplayType displayType = behaviour.getWireDisplayType(targetedPoint, mc.level, mc.player, stackInHand);
         if (displayType == WireInteractionBehaviour.DisplayType.DOT) {
-            pos1 = targetedPoint.node1().getPositionNoSable(mc.level);
-            pos2 = targetedPoint.node2().getPositionNoSable(mc.level);
-            RenderHelper.chaseAABBOnWire("cee_wire_interaction_point", AABB.ofSize(Vec3.ZERO, 0.01, 0.01, 0.01),
-                    pos1, pos2, targetedPoint.point(), bestWireData.getSag(bestWirePointDistance))
+            RenderHelper.OutlinerExt.chaseAABBOnWire("cee_wire_interaction_point", AABB.ofSize(Vec3.ZERO, 0.01, 0.01, 0.01),
+                    pos, targetedPoint.point(), bestWireData.getSag(bestWirePointDistance))
                     .lineWidth(0.15f)
                     .colored(behaviour.getWireDisplayColor(targetedPoint, mc.level, mc.player, stackInHand))
                     .disableLineNormals();
         } else if (displayType == WireInteractionBehaviour.DisplayType.LINE) {
-
-            List<Vec3> points = QuadraticWireHelper.cablePoints(pos1, pos2, bestWireData.getSag(bestWirePointDistance), 1f);
-            points.add(pos2);
-
-            for (int i = 0; i < points.size() - 1; i++) {
-                Vec3 point = points.get(i);
-                Vec3 nextPoint = points.get(i + 1);
-
-                Outliner.getInstance()
-                        .showLine("cee_wire_interaction_line_" + i, point, nextPoint)
-                        .lineWidth(0.07f * 16 * bestWireData.wireType().getThickness())
-                        .colored(behaviour.getWireDisplayColor(targetedPoint, mc.level, mc.player, stackInHand))
-                        .disableLineNormals();
-            }
+            float width = 0.07f * 16 * bestWireData.wireType().getThickness();
+            RenderHelper.OutlinerExt.showCableOutline("cee_wire_interaction_line_", pos, bestWireData.getSag(bestWirePointDistance),1f, (Outline.OutlineParams obj)->obj
+                    .lineWidth(width)
+                    .colored(behaviour.getWireDisplayColor(targetedPoint, mc.level, mc.player, stackInHand))
+                    .disableLineNormals() );
         }
 
     }
