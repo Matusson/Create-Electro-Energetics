@@ -1,9 +1,9 @@
-package com.george_vi.electroenergetics.foundation;
+package com.george_vi.electroenergetics.content.wire.interaction;
 
 
 import com.george_vi.electroenergetics.client.ElectricPropertiesOverlay;
 import com.george_vi.electroenergetics.client.WireRenderer;
-import com.george_vi.electroenergetics.content.wire.interaction.WireInteractionHandler;
+import com.george_vi.electroenergetics.foundation.QuadraticWireHelper;
 import com.george_vi.electroenergetics.foundation.nodes.InWorldNode;
 import com.george_vi.electroenergetics.foundation.nodes.InWorldNodeConnection;
 import com.george_vi.electroenergetics.foundation.nodes.NodeConnectionPoint;
@@ -25,12 +25,14 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Function;
 
-public class RenderHelper {
+public class RenderOnWireHandler {
     public static void renderCurrent(float amperage) {
         ElectricPropertiesOverlay.INSTANCE.setAmmeter(Math.abs(amperage));
         NodeConnectionPoint point = WireInteractionHandler.targetedPoint;
@@ -50,7 +52,6 @@ public class RenderHelper {
             int ticks = AnimationTickHolder.getTicks();
             int page = (int) Math.floor((ticks + 6 * i) / 24d);
             int dotID = page << 2 + i;
-
             float progress = ((ticks + 6 * i) % 24) / 24f;
 
             float pointOnWire = (float) (((point.point() * distance) + ((amperage > 0 ? progress : 1.0 - progress) * 1.2f) - 0.6f) / distance);
@@ -78,21 +79,23 @@ public class RenderHelper {
             outline.targetPoint = point;
             outline.sag = sag;
             outline.pos = pos;
+            outline.setSizeFromAABB(bb);
             return outline.getParams();
         }
 
-        public static void showCableOutline(String slot, Positions pos, float sag, float detail,
-                                            Function<Outline.OutlineParams, Outline.OutlineParams> processor) {
+        public static void showWireOutline(String slot, Positions pos, float sag, float detail,
+                                           Function<Outline.OutlineParams, Outline.OutlineParams> processor) {
             if (!wireOutlines.containsKey(slot)) {
                 wireOutlines.put(slot, new WireOutline(slot));
             }
             WireOutline wire = wireOutlines.get(slot);
-            wire.ttl = 5;
+            wire.ttl = 5; // keep it alive during using it
 
             wire.show(pos, sag, detail, processor);
         }
 
-        public static void tick() {
+        @OnlyIn(Dist.CLIENT)
+        public static void tick() { // clear
             ArrayList<String> toBeRemoved = new ArrayList<>();
             for (Map.Entry<String, WireOutline> entry : wireOutlines.entrySet()) {
                 int ttl = entry.getValue().ttl--;
@@ -105,7 +108,7 @@ public class RenderHelper {
         }
     }
 
-    public static class Positions {
+    public static class Positions { // Position Utilities
         Vec3 pos1, pos2;
         SubLevelAccess sl1, sl2; // SLA cache
 
@@ -149,7 +152,7 @@ public class RenderHelper {
             return toPositionWithSable(pos2, sl2);
         }
 
-        public double getDistance(){
+        public double getDistance() {
             return getPos1Sable().distanceTo(getPos2Sable());
         }
 
@@ -161,24 +164,29 @@ public class RenderHelper {
             return toPositionWithSable(pos2, sl2, pt);
         }
 
-        public double getDistance(float pt){
+        public double getDistance(float pt) {
             return getPos1Sable(pt).distanceTo(getPos2Sable(pt)); // may need it in the future
         }
     }
 
     public static class ChasingAABBOutlineOnWire extends AABBOutline {
-        Vec3 bbSize;
-        float prevPoint, targetPoint, sag; // Arguments for position computing
-        Positions pos;
+        protected Vec3 bbSize;
+        protected float targetPoint, sag; // Arguments for position computing
+        protected Positions pos;
+        private float prevPoint;
 
-        public ChasingAABBOutlineOnWire(AABB bb, Positions pos,float prev, float sag) {
+        public ChasingAABBOutlineOnWire(AABB bb, Positions pos, float prev, float sag) {
             super(AABB.ofSize(Vec3.ZERO, 0.01, 0.01, 0.01)); // avoid to be detected by sable mixin
-            bbSize = bb.getMaxPosition().subtract(bb.getMinPosition());
+            setSizeFromAABB(bb);
 
             this.pos = pos;
             this.sag = sag;
-            targetPoint = 0;
+            targetPoint = prev;
             prevPoint = prev;
+        }
+
+        public void setSizeFromAABB(AABB bb){
+            bbSize = bb.getMaxPosition().subtract(bb.getMinPosition());
         }
 
         @Override
@@ -197,21 +205,20 @@ public class RenderHelper {
 
     public static class WireOutline {
         private static final int SECTION_STRETCHING_BUFFER = 8;// I think it's enough to deal with stretching
-        int ttl = 1;
-        float sag, detail, pt = -1;
-        String slot;
-        Positions pos;
-        Function<Outline.OutlineParams, Outline.OutlineParams> processor;
-        private List<Vec3> cachedPoints;
-        private int sectionCount = 0, clearCount = 0;
+        private float sag, detail, pt = -1; // keep it updated
+        private Positions pos;
+        private List<Vec3> cachedPoints; // cache for same frame
+        private int sectionCount = 0; // count for resource clear
+        protected int ttl = 5;// Life Count
+        public final String slot;
 
         public WireOutline(String slot) {
             this.slot = slot;
         }
 
-        public void clear() {
+        protected void clear() {
             Outliner instance = Outliner.getInstance();
-            for (int i = 0; i < clearCount; i++) {
+            for (int i = 0; i < sectionCount; i++) {
                 instance.remove(slot + i);
             }
         }
@@ -220,16 +227,14 @@ public class RenderHelper {
             this.sag = sag;
             this.detail = detail;
             this.pos = pos;
-            this.processor = processor;
-            cachedPoints = QuadraticWireHelper.cablePoints(pos.getPos1Sable(pt), pos.getPos2Sable(pt), sag, detail);
-            clearCount = Math.max(clearCount, sectionCount);
-            sectionCount = 0;
-            for (int i = 0; i < cachedPoints.size() + SECTION_STRETCHING_BUFFER; i++) {
+            List<Vec3> points = QuadraticWireHelper.cablePoints(pos.getPos1Sable(), pos.getPos2Sable(), sag, detail);
+            for (int i = 0; i < points.size() + SECTION_STRETCHING_BUFFER; i++) {
                 Outline.OutlineParams params = addSection(slot + i, i);
-                if(processor != null){
-                    processor.apply(params);
+                if (processor != null) {
+                    processor.apply(params); // apply styles
                 }
             }
+            sectionCount = Math.max(sectionCount, points.size() + SECTION_STRETCHING_BUFFER);
         }
 
         private Outline.OutlineParams addSection(Object slot, int index) {
@@ -238,7 +243,6 @@ public class RenderHelper {
             if (!outlines.containsKey(slot)) {
                 WireOutlineSection outline = new WireOutlineSection(index);
                 instance.showOutline(slot, outline);
-                sectionCount++;
             }
             Outliner.OutlineEntry entry = outlines.get(slot);
             instance.keep(slot);
@@ -255,7 +259,7 @@ public class RenderHelper {
         }
 
         public class WireOutlineSection extends LineOutline {
-            int index;
+            public final int index;
 
             public WireOutlineSection(int index) {
                 this.index = index;

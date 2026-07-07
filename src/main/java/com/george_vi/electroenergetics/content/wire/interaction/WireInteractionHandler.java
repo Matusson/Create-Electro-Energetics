@@ -5,7 +5,6 @@ import com.george_vi.electroenergetics.client.WireRenderer;
 import com.george_vi.electroenergetics.content.electrical_panel.ElectricalPanelBlock;
 import com.george_vi.electroenergetics.content.wire_spool.WireApplyingBehaviour;
 import com.george_vi.electroenergetics.foundation.QuadraticWireHelper;
-import com.george_vi.electroenergetics.foundation.RenderHelper;
 import com.george_vi.electroenergetics.foundation.nodes.InWorldNodeConnection;
 import com.george_vi.electroenergetics.foundation.nodes.NodeConnectionPoint;
 import com.george_vi.electroenergetics.simulation.infrastructure.WireData;
@@ -159,19 +158,19 @@ public class WireInteractionHandler {
         if (pos1 == null || pos2 == null)
             return;
 
-        RenderHelper.Positions pos = new RenderHelper.Positions(pos1,pos2);
-
+        RenderOnWireHandler.Positions pos = new RenderOnWireHandler.Positions(pos1,pos2);
         targetedPos = QuadraticWireHelper.posAt(pos.getPos1Sable(), pos.getPos2Sable(), bestWireData.getSag(bestWirePointDistance));
         WireInteractionBehaviour.DisplayType displayType = behaviour.getWireDisplayType(targetedPoint, mc.level, mc.player, stackInHand);
         if (displayType == WireInteractionBehaviour.DisplayType.DOT) {
-            RenderHelper.OutlinerExt.chaseAABBOnWire("cee_wire_interaction_point", AABB.ofSize(Vec3.ZERO, 0.01, 0.01, 0.01),
+            RenderOnWireHandler.OutlinerExt.chaseAABBOnWire("cee_wire_interaction_point", AABB.ofSize(Vec3.ZERO, 0.01, 0.01, 0.01),
                     pos, targetedPoint.point(), bestWireData.getSag(bestWirePointDistance))
                     .lineWidth(0.15f)
                     .colored(behaviour.getWireDisplayColor(targetedPoint, mc.level, mc.player, stackInHand))
                     .disableLineNormals();
         } else if (displayType == WireInteractionBehaviour.DisplayType.LINE) {
             float width = 0.07f * 16 * bestWireData.wireType().getThickness();
-            RenderHelper.OutlinerExt.showCableOutline("cee_wire_interaction_line_", pos, bestWireData.getSag(bestWirePointDistance),1f, (Outline.OutlineParams obj)->obj
+            RenderOnWireHandler.OutlinerExt.showWireOutline("cee_wire_interaction_line_", pos, bestWireData.getSag(bestWirePointDistance),1f,
+                    (Outline.OutlineParams obj)->obj
                     .lineWidth(width)
                     .colored(behaviour.getWireDisplayColor(targetedPoint, mc.level, mc.player, stackInHand))
                     .disableLineNormals() );
