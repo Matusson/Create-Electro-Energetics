@@ -8,7 +8,7 @@ import com.george_vi.electroenergetics.client.NodeVoltageHolder;
 import com.george_vi.electroenergetics.client.WireRenderer;
 import com.george_vi.electroenergetics.content.clamp_meter.ClampMeterItem;
 import com.george_vi.electroenergetics.content.wire.interaction.InteractWirePacket;
-import com.george_vi.electroenergetics.content.wire.interaction.OutlineOnWIreRenderer;
+import com.george_vi.electroenergetics.content.wire.interaction.OutlinesOnWireRenderer;
 import com.george_vi.electroenergetics.content.wire.interaction.WireInteractionHandler;
 import com.george_vi.electroenergetics.foundation.nodes.InWorldNodeConnection;
 import com.george_vi.electroenergetics.foundation.nodes.NodeConnectionPoint;
@@ -153,7 +153,7 @@ public class LinemansStickItem extends Item {
 
     @OnlyIn(Dist.CLIENT)
     protected void setMetering(float amperage) {
-        OutlineOnWIreRenderer.renderCurrent(amperage);
+        OutlinesOnWireRenderer.renderCurrent(amperage);
     }
 
 }

@@ -32,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.Function;
 
-public class OutlineOnWIreRenderer {
+public class OutlinesOnWireRenderer {
     public static void renderCurrent(float amperage) {
         ElectricPropertiesOverlay.INSTANCE.setAmmeter(Math.abs(amperage));
         NodeConnectionPoint point = WireInteractionHandler.targetedPoint;
