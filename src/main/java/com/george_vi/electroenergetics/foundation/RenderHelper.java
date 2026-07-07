@@ -4,6 +4,7 @@ package com.george_vi.electroenergetics.foundation;
 import com.george_vi.electroenergetics.client.ElectricPropertiesOverlay;
 import com.george_vi.electroenergetics.client.WireRenderer;
 import com.george_vi.electroenergetics.content.wire.interaction.WireInteractionHandler;
+import com.george_vi.electroenergetics.foundation.nodes.InWorldNode;
 import com.george_vi.electroenergetics.foundation.nodes.InWorldNodeConnection;
 import com.george_vi.electroenergetics.foundation.nodes.NodeConnectionPoint;
 import com.george_vi.electroenergetics.simulation.infrastructure.WireData;
@@ -36,10 +37,12 @@ public class RenderHelper {
         Level level = Minecraft.getInstance().level;
         WireData wireData = WireRenderer.getConnectionData(new InWorldNodeConnection(point.node1(), point.node2()));
 
-        Vec3 pos1 = point.node1().getPositionNoSable(level);
-        Vec3 pos2 = point.node2().getPositionNoSable(level);
-        Vec3 pos1s = point.node1().getPosition(level);
-        Vec3 pos2s = point.node1().getPosition(level);
+        InWorldNode node1 = point.node1();
+        InWorldNode node2 = point.node2();
+        Vec3 pos1 = node1.getPositionNoSable(level);
+        Vec3 pos2 = node2.getPositionNoSable(level);
+        Vec3 pos1s = node1.getPosition(level);
+        Vec3 pos2s = node2.getPosition(level);
         if(pos1s == null || pos2s == null){
             return;
         }
@@ -62,7 +65,7 @@ public class RenderHelper {
         }
     }
 
-    public static Vec3 toPositionWithSable(SubLevelAccess subLevelAccess, Vec3 pos, float pt) {
+    public static Vec3 toPositionWithSable(Vec3 pos, SubLevelAccess subLevelAccess, float pt) {
         if (subLevelAccess == null) {
             return pos;
         }
@@ -117,8 +120,8 @@ public class RenderHelper {
         @Override
         public void render(@NotNull PoseStack ms, @NotNull SuperRenderTypeBuffer buffer, @NotNull Vec3 camera, float pt) {
 
-            Vec3 pos1s = toPositionWithSable(sl1, pos1, pt);
-            Vec3 pos2s = toPositionWithSable(sl2, pos2, pt);
+            Vec3 pos1s = toPositionWithSable(pos1, sl1, pt);
+            Vec3 pos2s = toPositionWithSable(pos2, sl2, pt);
 
             // avoid offsets caused by sublevel
             Vec3 currentPos = QuadraticWireHelper.posAt(pos1s, pos2s, Mth.lerp(pt, prevPoint, targetPoint), sag);
