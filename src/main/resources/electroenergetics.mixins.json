@@ -22,6 +22,7 @@
     "BlockStateBaseMixin",
     "CarriageContraptionMixin",
     "CarriageMixin",
+    "ComparatorBlockMixin",
     "FluidPropagatorMixin",
     "LevelChunkMixin",
     "LivingEntityMixin",

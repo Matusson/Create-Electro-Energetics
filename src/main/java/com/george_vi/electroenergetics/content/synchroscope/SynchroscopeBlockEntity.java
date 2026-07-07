@@ -8,7 +8,6 @@ import com.simibubi.create.foundation.item.TooltipHelper;
 import com.simibubi.create.foundation.utility.CreateLang;
 import net.createmod.catnip.animation.LerpedFloat;
 import net.createmod.catnip.lang.FontHelper;
-import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -28,6 +27,9 @@ public class SynchroscopeBlockEntity extends SmartBlockEntity implements IHaveHo
     int counter = 0;
     public boolean validConnection;
     LerpedFloat smoothPhase = LerpedFloat.angular();
+    int redstoneSignal;
+    int ccwRedstoneSignal;
+    int cwRedstoneSignal;
 
     public SynchroscopeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -47,6 +49,19 @@ public class SynchroscopeBlockEntity extends SmartBlockEntity implements IHaveHo
 //        if (AngleHelper.getShortestAngleDiff(smoothPhase.getValue(), phaseOffset) > 1)
 //            smoothPhase.chase(phaseOffset, 1, LerpedFloat.Chaser.EXP);
         smoothPhase.tickChaser();
+
+        if (!level.isClientSide()) {
+            int newRedstoneSignal = ((-Math.round(phaseOffset * (16.0f / 360.0f)) % 16) + 16) % 16;
+            int sidedSignal = (((-Math.round(phaseOffset * (32 / 360.0f)) % 32) + 16) % 32) - 16; // range -16 to 15
+            int newCwSignal = Mth.clamp(sidedSignal, 0, 15);
+            int newCcwRightSignal = Mth.clamp(-sidedSignal - 1, 0, 15);
+            if (newRedstoneSignal != redstoneSignal || newCwSignal != ccwRedstoneSignal || newCcwRightSignal != cwRedstoneSignal) {
+                redstoneSignal = newRedstoneSignal;
+                ccwRedstoneSignal = newCwSignal;
+                cwRedstoneSignal = newCcwRightSignal;
+                setChanged();
+            }
+        }
     }
 
     @Override
