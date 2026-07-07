@@ -32,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.Function;
 
-public class RenderOnWireHandler {
+public class OutlineOnWIreRenderer {
     public static void renderCurrent(float amperage) {
         ElectricPropertiesOverlay.INSTANCE.setAmmeter(Math.abs(amperage));
         NodeConnectionPoint point = WireInteractionHandler.targetedPoint;
@@ -70,10 +70,10 @@ public class RenderOnWireHandler {
             Outliner instance = Outliner.getInstance();
             Map<Object, Outliner.OutlineEntry> outlines = instance.getOutlines();
             if (!outlines.containsKey(slot) || !(outlines.get(slot).getOutline() instanceof AABBOutline)) {
-                instance.showOutline(slot, new ChasingAABBOutlineOnWire(bb, pos, point, sag));
+                instance.showOutline(slot, new ChasingAABBOnWireOutline(bb, pos, point, sag));
             }
 
-            ChasingAABBOutlineOnWire outline = (ChasingAABBOutlineOnWire) outlines.get(slot).getOutline();
+            ChasingAABBOnWireOutline outline = (ChasingAABBOnWireOutline) outlines.get(slot).getOutline();
             instance.keep(slot);
 
             outline.targetPoint = point;
@@ -108,7 +108,7 @@ public class RenderOnWireHandler {
         }
     }
 
-    public static class Positions { // Position Utilities
+    public static class Positions { // Position Tools
         Vec3 pos1, pos2;
         SubLevelAccess sl1, sl2; // SLA cache
 
@@ -169,13 +169,13 @@ public class RenderOnWireHandler {
         }
     }
 
-    public static class ChasingAABBOutlineOnWire extends AABBOutline {
+    public static class ChasingAABBOnWireOutline extends AABBOutline {
         protected Vec3 bbSize;
         protected float targetPoint, sag; // Arguments for position computing
         protected Positions pos;
         private float prevPoint;
 
-        public ChasingAABBOutlineOnWire(AABB bb, Positions pos, float prev, float sag) {
+        public ChasingAABBOnWireOutline(AABB bb, Positions pos, float prev, float sag) {
             super(AABB.ofSize(Vec3.ZERO, 0.01, 0.01, 0.01)); // avoid to be detected by sable mixin
             setSizeFromAABB(bb);
 

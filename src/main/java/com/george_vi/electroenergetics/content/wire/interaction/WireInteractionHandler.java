@@ -158,18 +158,18 @@ public class WireInteractionHandler {
         if (pos1 == null || pos2 == null)
             return;
 
-        RenderOnWireHandler.Positions pos = new RenderOnWireHandler.Positions(pos1,pos2);
+        OutlineOnWIreRenderer.Positions pos = new OutlineOnWIreRenderer.Positions(pos1,pos2);
         targetedPos = QuadraticWireHelper.posAt(pos.getPos1Sable(), pos.getPos2Sable(), bestWireData.getSag(bestWirePointDistance));
         WireInteractionBehaviour.DisplayType displayType = behaviour.getWireDisplayType(targetedPoint, mc.level, mc.player, stackInHand);
         if (displayType == WireInteractionBehaviour.DisplayType.DOT) {
-            RenderOnWireHandler.OutlinerExt.chaseAABBOnWire("cee_wire_interaction_point", AABB.ofSize(Vec3.ZERO, 0.01, 0.01, 0.01),
+            OutlineOnWIreRenderer.OutlinerExt.chaseAABBOnWire("cee_wire_interaction_point", AABB.ofSize(Vec3.ZERO, 0.01, 0.01, 0.01),
                     pos, targetedPoint.point(), bestWireData.getSag(bestWirePointDistance))
                     .lineWidth(0.15f)
                     .colored(behaviour.getWireDisplayColor(targetedPoint, mc.level, mc.player, stackInHand))
                     .disableLineNormals();
         } else if (displayType == WireInteractionBehaviour.DisplayType.LINE) {
             float width = 0.07f * 16 * bestWireData.wireType().getThickness();
-            RenderOnWireHandler.OutlinerExt.showWireOutline("cee_wire_interaction_line_", pos, bestWireData.getSag(bestWirePointDistance),1f,
+            OutlineOnWIreRenderer.OutlinerExt.showWireOutline("cee_wire_interaction_line_", pos, bestWireData.getSag(bestWirePointDistance),1f,
                     (Outline.OutlineParams obj)->obj
                     .lineWidth(width)
                     .colored(behaviour.getWireDisplayColor(targetedPoint, mc.level, mc.player, stackInHand))
