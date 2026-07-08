@@ -159,7 +159,7 @@ public class WireInteractionHandler {
             return;
 
         OutlinesOnWireRenderer.Positions pos = new OutlinesOnWireRenderer.Positions(pos1,pos2);
-        targetedPos = QuadraticWireHelper.posAt(pos.getPos1Sable(), pos.getPos2Sable(), bestWireData.getSag(bestWirePointDistance));
+        targetedPos = QuadraticWireHelper.posAt(pos.getPos1Sable(), pos.getPos2Sable(), targetedPoint.point(), bestWireData.getSag(bestWirePointDistance));
         WireInteractionBehaviour.DisplayType displayType = behaviour.getWireDisplayType(targetedPoint, mc.level, mc.player, stackInHand);
         if (displayType == WireInteractionBehaviour.DisplayType.DOT) {
             OutlinesOnWireRenderer.OutlinerExt.chaseAABBOnWire("cee_wire_interaction_point", AABB.ofSize(Vec3.ZERO, 0.01, 0.01, 0.01),
