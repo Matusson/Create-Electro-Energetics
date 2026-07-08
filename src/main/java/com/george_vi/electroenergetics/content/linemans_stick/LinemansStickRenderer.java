@@ -114,9 +114,7 @@ public class LinemansStickRenderer extends CustomRenderedItemModelRenderer {
                 -camera.getPosition().y() + base.y(),
                 -camera.getPosition().z() + base.z());
 
-        Vec3 hitPos = VecHelper.lerp(AnimationTickHolder.getPartialTicks(),
-                LinemansStickClientHandler.prevLinemansStickTarget,
-                LinemansStickClientHandler.linemansStickTarget);
+        Vec3 hitPos = LinemansStickClientHandler.linemansStickTarget.getHitPos(AnimationTickHolder.getPartialTicks());
 
         Vec3 diff = hitPos.subtract(base);
 
