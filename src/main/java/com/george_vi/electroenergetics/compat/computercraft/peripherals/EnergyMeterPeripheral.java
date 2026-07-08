@@ -17,21 +17,6 @@ public class EnergyMeterPeripheral extends SyncedPeripheral<EnergyMeterBlockEnti
 	}
 
 	@LuaFunction
-	public final void resetCounter() {
-		CatnipServices.NETWORK.sendToServer(new ChangeEnergyMeterStatePacket(true, blockEntity.disconnected, blockEntity.getBlockPos()));
-	}
-
-	@LuaFunction
-	public final void disconnect() {
-		CatnipServices.NETWORK.sendToServer(new ChangeEnergyMeterStatePacket(false, true, blockEntity.getBlockPos()));
-	}
-
-	@LuaFunction
-	public final void connect() {
-		CatnipServices.NETWORK.sendToServer(new ChangeEnergyMeterStatePacket(false, false, blockEntity.getBlockPos()));
-	}
-
-	@LuaFunction
 	public final boolean isConnected() {
 		return !blockEntity.disconnected;
 	}
