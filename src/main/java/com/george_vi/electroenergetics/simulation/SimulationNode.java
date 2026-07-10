@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
-public class WrappedIndexedNode {
+public class SimulationNode {
     public final Node node;
     public final int ordinal;
     public Int2ObjectArrayMap<ElectricalProperties> adjacency = new Int2ObjectArrayMap<>(8);
@@ -23,10 +23,13 @@ public class WrappedIndexedNode {
     public double rmsVoltage;
     public Int2ObjectArrayMap<ElectricalProperties> localAdjacencyOverride = null;
 
-    // for Network#seriesOptimize
+    // for Network:
     public byte dissolveState;
+    public int simNodeID;
 
-    public WrappedIndexedNode(Node node, int ordinal) {
+    public int currentRegionID;
+
+    public SimulationNode(Node node, int ordinal) {
         if (node == null)
             throw new IllegalArgumentException("node can't be null!");
         this.node = node;

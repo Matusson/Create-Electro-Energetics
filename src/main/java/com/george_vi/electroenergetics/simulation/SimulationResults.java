@@ -6,7 +6,6 @@ import com.george_vi.electroenergetics.foundation.nodes.Node;
 import com.george_vi.electroenergetics.simulation.electrical_properties.ElectricalProperties;
 import com.george_vi.electroenergetics.simulation.infrastructure.InfrastructureSavedData;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import net.minecraft.core.BlockPos;
 
 import java.util.ArrayList;
@@ -16,14 +15,12 @@ import java.util.List;
 public class SimulationResults {
     double[] voltages;
     double[] rmsVoltages;
-    Object2DoubleMap<DirectionalNodeConnection> sourceAmps;
     public CircuitBuilder circuitBuilder;
     InfrastructureSavedData sd;
     final int microTicks;
 
-    public SimulationResults(double[] voltages, int microTicks, Object2DoubleMap<DirectionalNodeConnection> sourceAmps, CircuitBuilder circuitBuilder, InfrastructureSavedData sd) {
+    public SimulationResults(double[] voltages, int microTicks, CircuitBuilder circuitBuilder, InfrastructureSavedData sd) {
         this.voltages = voltages;
-        this.sourceAmps = sourceAmps;
         this.circuitBuilder = circuitBuilder;
         this.sd = sd;
         this.microTicks = microTicks;
@@ -78,10 +75,6 @@ public class SimulationResults {
         node1 = fc.node1();
         node2 = fc.node2();
 
-        if (sourceAmps.containsKey(fc))
-            return sourceAmps.getDouble(fc);
-        if (sourceAmps.containsKey(fc.invert()))
-            return -sourceAmps.getDouble(fc.invert());
         ElectricalProperties properties = circuitBuilder.getConnectionProperties(node1, node2);
         if (properties == null || properties.resistance() == 0)
             return 0;
@@ -129,8 +122,8 @@ public class SimulationResults {
         if (nodeId1 == -1 || nodeId2 == -1)
             return new DirectionalNodeConnection(node1, node2);
 
-        WrappedIndexedNode indexedNode1 = circuitBuilder.getNode(nodeId1);
-        WrappedIndexedNode indexedNode2 = circuitBuilder.getNode(nodeId2);
+        SimulationNode indexedNode1 = circuitBuilder.getNode(nodeId1);
+        SimulationNode indexedNode2 = circuitBuilder.getNode(nodeId2);
         if (indexedNode1.adjacency.containsKey(indexedNode2.ordinal))
             return new DirectionalNodeConnection(node1, node2);
 
@@ -229,9 +222,9 @@ public class SimulationResults {
      * @return -1 if the node doesn't exist.
      */
     public int getNodeID(Node node, int hint) {
-        List<WrappedIndexedNode> allIndexedNodes = circuitBuilder.allIndexedNodes;
+        List<SimulationNode> allIndexedNodes = circuitBuilder.allIndexedNodes;
         if (hint >= 0 && hint < allIndexedNodes.size()) {
-            WrappedIndexedNode wn = allIndexedNodes.get(hint);
+            SimulationNode wn = allIndexedNodes.get(hint);
             return hint;
         }
         return circuitBuilder.nodeIndexes.getInt(node);

@@ -1,20 +1,20 @@
 package com.george_vi.electroenergetics.simulation.optimization;
 
-import com.george_vi.electroenergetics.simulation.WrappedIndexedNode;
+import com.george_vi.electroenergetics.simulation.SimulationNode;
 import com.george_vi.electroenergetics.simulation.electrical_properties.ElectricalProperties;
 
 public class StarToDeltaEntry implements TopologyOptimizationEntry {
     public final ElectricalProperties a;
     public final ElectricalProperties b;
     public final ElectricalProperties c;
-    public final WrappedIndexedNode centralNode;
-    public final WrappedIndexedNode na;
-    public final WrappedIndexedNode nb;
-    public final WrappedIndexedNode nc;
+    public final SimulationNode centralNode;
+    public final SimulationNode na;
+    public final SimulationNode nb;
+    public final SimulationNode nc;
 
     public StarToDeltaEntry(ElectricalProperties a, ElectricalProperties b, ElectricalProperties c,
-                            WrappedIndexedNode na, WrappedIndexedNode nb, WrappedIndexedNode nc,
-                            WrappedIndexedNode centralNode) {
+                            SimulationNode na, SimulationNode nb, SimulationNode nc,
+                            SimulationNode centralNode) {
         this.a = a;
         this.b = b;
         this.c = c;

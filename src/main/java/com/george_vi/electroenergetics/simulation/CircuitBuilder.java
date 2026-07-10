@@ -21,7 +21,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import java.util.*;
 
 public class CircuitBuilder {
-    List<WrappedIndexedNode> allIndexedNodes;
+    List<SimulationNode> allIndexedNodes;
     Object2IntMap<Node> nodeIndexes;
     Int2IntMap defaultZeroPotentials;  // K -> node id, V -> priority
     public Long2ObjectMap<MicroTickingElectricalProperties> microTickers = new Long2ObjectOpenHashMap<>();
@@ -33,14 +33,14 @@ public class CircuitBuilder {
         nodeIndexes.defaultReturnValue(-1);
         defaultZeroPotentials = new Int2IntOpenHashMap();
         for (Node node : nodes) {
-            WrappedIndexedNode indexedNode = new WrappedIndexedNode(node, id);
+            SimulationNode indexedNode = new SimulationNode(node, id);
             allIndexedNodes.add(indexedNode);
             nodeIndexes.put(node, id);
             id++;
         }
     }
 
-    public CircuitBuilder(int id, List<WrappedIndexedNode> allLazyIndexedNodes, Object2IntOpenHashMap<Node> lazyIndexedNodeIndexes) {
+    public CircuitBuilder(int id, List<SimulationNode> allLazyIndexedNodes, Object2IntOpenHashMap<Node> lazyIndexedNodeIndexes) {
         allIndexedNodes = new ArrayList<>(allLazyIndexedNodes);
         nodeIndexes = lazyIndexedNodeIndexes.clone();
         nodeIndexes.defaultReturnValue(-1);
@@ -53,11 +53,11 @@ public class CircuitBuilder {
         checkOutOfBounds(n1);
         checkOutOfBounds(n2);
 
-        WrappedIndexedNode indexedNode1 = allIndexedNodes.get(n1);
+        SimulationNode indexedNode1 = allIndexedNodes.get(n1);
         return indexedNode1.adjacency.get(n2);
     }
 
-    public ElectricalProperties getConnectionProperties(WrappedIndexedNode n1, WrappedIndexedNode n2) {
+    public ElectricalProperties getConnectionProperties(SimulationNode n1, SimulationNode n2) {
         return n1.adjacency.get(n2.ordinal);
     }
 
@@ -81,13 +81,13 @@ public class CircuitBuilder {
         if (Double.isNaN(properties.resistance()) || Double.isNaN(properties.voltageSource()) || Double.isNaN(properties.currentSource()))
             return;
 
-        WrappedIndexedNode indexedNode1 = allIndexedNodes.get(n1);
-        WrappedIndexedNode indexedNode2 = allIndexedNodes.get(n2);
+        SimulationNode indexedNode1 = allIndexedNodes.get(n1);
+        SimulationNode indexedNode2 = allIndexedNodes.get(n2);
         if (properties instanceof MicroTickingElectricalProperties ep)
             microTickers.put(DataPacker.pack(n1, n2), ep);
 
         if (properties instanceof CoupledProperties cp && cp.isPrimary()) { // Mark the node so it's solved in the same circuit as the coupled nodes
-            WrappedIndexedNode in1 = getNode(cp.coupledNodes().node1());
+            SimulationNode in1 = getNode(cp.coupledNodes().node1());
             if (in1 != null) {
                 indexedNode1.invisibleAdjacency.add(in1.ordinal);
                 in1.invisibleAdjacency.add(indexedNode1.ordinal);
@@ -98,14 +98,14 @@ public class CircuitBuilder {
         indexedNode2.adjacency.put(n1, properties.invert());
     }
 
-    public void connect(WrappedIndexedNode n1, WrappedIndexedNode n2, ElectricalProperties properties) {
+    public void connect(SimulationNode n1, SimulationNode n2, ElectricalProperties properties) {
         if (Double.isNaN(properties.resistance()) || Double.isNaN(properties.voltageSource()) || Double.isNaN(properties.currentSource()))
             return;
         if (properties instanceof MicroTickingElectricalProperties ep)
             microTickers.put(DataPacker.pack(n1.ordinal, n2.ordinal), ep);
 
         if (properties instanceof CoupledProperties cp && cp.isPrimary()) { // Mark the node so it's solved in the same circuit as the coupled nodes
-            WrappedIndexedNode n = getNode(cp.coupledNodes().node1());
+            SimulationNode n = getNode(cp.coupledNodes().node1());
             if (n != null)
                 n1.invisibleAdjacency.add(n.ordinal);
         }
@@ -132,7 +132,7 @@ public class CircuitBuilder {
         allIndexedNodes.get(node).groundConductance = conductance;
     }
 
-    public void ground(WrappedIndexedNode node, double conductance) {
+    public void ground(SimulationNode node, double conductance) {
         node.groundConductance = conductance;
     }
 
@@ -148,7 +148,7 @@ public class CircuitBuilder {
         defaultZeroPotentials.put(node, priority);
     }
 
-    public void defaultZeroPotential(WrappedIndexedNode node, int priority) {
+    public void defaultZeroPotential(SimulationNode node, int priority) {
         defaultZeroPotentials.put(node.ordinal, priority);
     }
 
@@ -159,44 +159,63 @@ public class CircuitBuilder {
         defaultZeroPotential(i, priority);
     }
 
-    public WrappedIndexedNode addNode(Node node) {
-        WrappedIndexedNode indexedNode = new WrappedIndexedNode(node, id);
+    public SimulationNode addNode(Node node) {
+        SimulationNode indexedNode = new SimulationNode(node, id);
         allIndexedNodes.add(indexedNode);
         nodeIndexes.put(node, id);
         id++;
         return indexedNode;
     }
 
-    List<List<WrappedIndexedNode>> allNetworks;
-    private Deque<WrappedIndexedNode> dequeStack;
+    List<List<SimulationNode>> allNetworks;
+    private Deque<SimulationNode> dequeStack;
+
+    // For Network(s):
+    // it's here because there are multiple networks and these arrays are created during DFS
+    public byte[] currentRegionGrounded;
+    public double[] currentRegionZeroPotential;
+    public double[] nodeGroundConductance;
+    public int[] nodeCurrentRegionID;
 
     /**
      * Separates all network nodes into isolated sub-circuits. Applies ground to a node with the highest priority, if the sub-circuit doesn't contain a ground node.
      * @return List of isolated circuits
      */
-    public List<List<WrappedIndexedNode>> dfsAndGround() {
+    public List<List<SimulationNode>> dfsAndGround() {
         dequeStack = new ArrayDeque<>();
-        List<List<WrappedIndexedNode>> allNetworks = new ArrayList<>(allIndexedNodes.size());
+        List<List<SimulationNode>> allNetworks = new ArrayList<>(allIndexedNodes.size());
+        nodeGroundConductance = new double[allIndexedNodes.size()];
+        nodeCurrentRegionID = new int[allIndexedNodes.size()];
         boolean[] visited = new boolean[allIndexedNodes.size()];
         for (int i = 0; i < allIndexedNodes.size(); i++) {
             if (visited[i])
                 continue;
             visited[i] = true;
-            WrappedIndexedNode node = allIndexedNodes.get(i);
-            List<WrappedIndexedNode> networkNodes = new ArrayList<>();
+            SimulationNode node = allIndexedNodes.get(i);
+            List<SimulationNode> networkNodes = new ArrayList<>();
             networkNodes.add(node);
             if (dfsInner(node, visited, networkNodes, false))
                 allNetworks.add(networkNodes);
         }
 
-        NetworksLoop:
-        for (List<WrappedIndexedNode> networkNodes : allNetworks) {
-            WrappedIndexedNode highestPriorityGround = null;
+        int currentRegionID = 0;
+        currentRegionGrounded = new byte[allNetworks.size()];
+        currentRegionZeroPotential = new double[allNetworks.size()];
+        for (List<SimulationNode> networkNodes : allNetworks) {
+            SimulationNode highestPriorityGround = null;
             int highestPriority = Integer.MIN_VALUE;
+            boolean foundGround = false;
 
-            for (WrappedIndexedNode node : networkNodes) {
-                if (node.groundConductance != 0d)
-                    continue NetworksLoop;
+            for (SimulationNode node : networkNodes) {
+                node.currentRegionID = currentRegionID;
+                nodeCurrentRegionID[node.ordinal] = currentRegionID;
+                if (node.groundConductance != 0d) {
+                    nodeGroundConductance[node.ordinal] = node.groundConductance;
+                    foundGround = true;
+                }
+
+                if (foundGround)
+                    continue;
 
                 int priority = defaultZeroPotentials.get(node.ordinal);
                 if (priority == highestPriority) {
@@ -207,8 +226,13 @@ public class CircuitBuilder {
                     highestPriority = priority;
                 }
             }
-            if (highestPriorityGround != null)
-                highestPriorityGround.groundConductance = -1000d;
+
+            if (highestPriorityGround != null) {
+                nodeGroundConductance[highestPriorityGround.ordinal] = 1000;
+                highestPriorityGround.groundConductance = 1000d;
+            }
+
+            currentRegionID++;
         }
 
         allNetworks.clear();
@@ -217,8 +241,8 @@ public class CircuitBuilder {
             if (visited[i])
                 continue;
             visited[i] = true;
-            WrappedIndexedNode node = allIndexedNodes.get(i);
-            List<WrappedIndexedNode> networkNodes = new ArrayList<>();
+            SimulationNode node = allIndexedNodes.get(i);
+            List<SimulationNode> networkNodes = new ArrayList<>();
             networkNodes.add(node);
             if (dfsInner(node, visited, networkNodes, true))
                 allNetworks.add(networkNodes);
@@ -230,12 +254,12 @@ public class CircuitBuilder {
     /**
      * @return false if it only consists of resistors, otherwise true.
      */
-    private boolean dfsInner(WrappedIndexedNode startNode, boolean[] visited, List<WrappedIndexedNode> networkNodes, boolean invis) {
+    private boolean dfsInner(SimulationNode startNode, boolean[] visited, List<SimulationNode> networkNodes, boolean invis) {
         dequeStack.clear();
         dequeStack.push(startNode);
         boolean hasSource = false;
         while (!dequeStack.isEmpty()) {
-            WrappedIndexedNode node = dequeStack.pop();
+            SimulationNode node = dequeStack.pop();
             if (!node.invisibleAdjacency.isEmpty())
                 hasSource = true;
 
@@ -246,7 +270,7 @@ public class CircuitBuilder {
                 if (visited[i])
                     continue;
                 visited[i] = true;
-                WrappedIndexedNode adjacentNode = allIndexedNodes.get(i);
+                SimulationNode adjacentNode = allIndexedNodes.get(i);
                 networkNodes.add(adjacentNode);
                 dequeStack.push(adjacentNode);
             }
@@ -256,7 +280,7 @@ public class CircuitBuilder {
                     if (visited[i])
                         continue;
                     visited[i] = true;
-                    WrappedIndexedNode adjacentNode = allIndexedNodes.get(i);
+                    SimulationNode adjacentNode = allIndexedNodes.get(i);
                     networkNodes.add(adjacentNode);
                     dequeStack.push(adjacentNode);
                 }
@@ -270,16 +294,16 @@ public class CircuitBuilder {
             throw new IllegalArgumentException("(Indexed) node of ID: " + id + " doesn't exist");
     }
 
-    public List<WrappedIndexedNode> allNodes() {
+    public List<SimulationNode> allNodes() {
         return allIndexedNodes;
     }
 
-    public WrappedIndexedNode getNode(int id) {
+    public SimulationNode getNode(int id) {
         checkOutOfBounds(id);
         return allIndexedNodes.get(id);
     }
 
-    public WrappedIndexedNode getNode(Node node) {
+    public SimulationNode getNode(Node node) {
         int i = nodeIndexes.getInt(node);
         if (i == -1)
             return null;

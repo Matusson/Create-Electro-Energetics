@@ -19,6 +19,10 @@ public class SparseMatrix {
         data[row].put(col, val);
     }
 
+    public void add(int row, int col, double val) {
+        data[row].put(col, data[row].get(col) + val);
+    }
+
     public void multiplyAndFillInto(double[] vector, double[] toFill) {
         for (int i = 0; i < size; i++) {
             double sum = 0;

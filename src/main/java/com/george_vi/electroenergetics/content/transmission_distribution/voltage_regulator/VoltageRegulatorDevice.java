@@ -31,24 +31,6 @@ public class VoltageRegulatorDevice extends SimpleElectricalDevice {
     private static final int NODE_INPUT_DIV = 6;
     private static final int NODE_OUTPUT_DIV = 7;
 
-    /*
-    The bottom is always controller
-
-    This is how it works electrically:
-              _______
-    INPUT --- |  R  | --- INPUT_DIV
-      |       """""""            |
-      ------------------------   |
-                             |   (
-                             (   )
-        TRANSFORMER here --> )   (
-                             (   )
-            _______          |   (
-    OUTPUT -|  R  |- OUTPUT_DIV  |
-            """""""              |
-                              GROUND
-    */
-
     public float temp;
     public VoltageRegulatorBlockEntity be;
     public int steps;
@@ -97,8 +79,8 @@ public class VoltageRegulatorDevice extends SimpleElectricalDevice {
             }
         }
 
-        TransformerElectricalProperties ep = new TransformerElectricalProperties(ratio,
-                new DirectionalNodeConnection(nodes.input, nodes.outputDiv),
+        TransformerElectricalProperties ep = new TransformerElectricalProperties(ratio + 1,
+                new DirectionalNodeConnection(nodes.ground, nodes.outputDiv),
                 new DirectionalNodeConnection(nodes.ground, nodes.inputDiv));
 
         builder.node(nodes.inputDiv)
@@ -106,7 +88,7 @@ public class VoltageRegulatorDevice extends SimpleElectricalDevice {
                 .resistor(nodes.input, nodes.inputDiv,  INPUT_RESISTANCE)
                 .resistor(nodes.output, nodes.outputDiv, OUTPUT_RESISTANCE)
                 .connect(nodes.inputDiv, nodes.ground, ep.getOtherProperties())
-                .connect(nodes.input, nodes.outputDiv, ep);
+                .connect(nodes.ground, nodes.outputDiv, ep);
 
 
     }

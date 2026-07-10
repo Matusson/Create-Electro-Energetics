@@ -130,6 +130,7 @@ public class RedstoneVariacBlockEntity extends SmartBlockEntity {
             0.5d,
             0.6d,
             0.7d,
+            0.8d,
             0.9d,
             1.0d,
             1.1d,
@@ -139,6 +140,7 @@ public class RedstoneVariacBlockEntity extends SmartBlockEntity {
             1.5d,
             1.6d,
             1.7d,
+            1.8d,
             1.9d,
             2.0d,
     };

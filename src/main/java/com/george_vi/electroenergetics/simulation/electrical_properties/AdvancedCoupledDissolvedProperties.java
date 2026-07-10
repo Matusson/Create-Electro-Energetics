@@ -5,9 +5,10 @@ import com.george_vi.electroenergetics.simulation.SimulationNode;
 import java.util.Collection;
 
 /**
- * @see DissolvedProperties
+ * @see com.george_vi.electroenergetics.simulation.optimization.AdvancedCoupledPropertiesOptimizationEntry
  */
-public class AdvancedDissolvedProperties extends MicroTickingElectricalProperties implements IDissolvedProperties {
+public class AdvancedCoupledDissolvedProperties extends MicroTickingElectricalProperties implements IDissolvedProperties {
+    private final double ratio;
     private final int[] originalNodeIDs;
     /**
      * Stores the original resistances if it is a simple resistor
@@ -24,9 +25,9 @@ public class AdvancedDissolvedProperties extends MicroTickingElectricalPropertie
      * Only a voltage source if it can not be described in Norton form.
      */
     private double voltageSource;
-    private boolean hasNonResistor;
 
-    public AdvancedDissolvedProperties(Collection<SimulationNode> originalNodes, Collection<ElectricalProperties> originalResistances) {
+    public AdvancedCoupledDissolvedProperties(double ratio, Collection<SimulationNode> originalNodes, Collection<ElectricalProperties> originalResistances) {
+        this.ratio = ratio;
         // fill original nodes
         this.originalNodeIDs = new int[originalNodes.size()];
         int i = 0;
@@ -38,18 +39,14 @@ public class AdvancedDissolvedProperties extends MicroTickingElectricalPropertie
         this.originalProperties = new ElectricalProperties[originalResistances.size()];
         i = 0;
         resistance = 0;
-        hasNonResistor = false;
         for (ElectricalProperties properties : originalResistances) {
             this.originalResistances[i] = properties.resistance();
             resistance += properties.resistance();
-            if (!properties.isSimpleResistor()) {
-                hasNonResistor = true;
+            if (!properties.isSimpleResistor())
                 originalProperties[i] = properties;
-            }
 
             i++;
         }
-
     }
 
     @Override
@@ -94,6 +91,16 @@ public class AdvancedDissolvedProperties extends MicroTickingElectricalPropertie
             voltageSource = 0;
             currentSource = baseVoltageSource / baseSeriesResistance;
         }
+
+        // update to match ratio
+
+        if (voltageSource != 0) {
+            // in the case it's a voltage source (it's never)
+            voltageSource *= ratio;
+        } else {
+            resistance = resistance / ratio / ratio;
+            currentSource = currentSource * ratio;
+        }
     }
 
     @Override
@@ -114,11 +121,13 @@ public class AdvancedDissolvedProperties extends MicroTickingElectricalPropertie
 
     @Override
     public void getVoltages(double iv1, double iv2, double[] toFill, int microTick, int totalMicroTicks) {
-        double totalResistance = resistance;
+        // iv1 and iv2 is already the secondary
+        double totalResistance = resistance * ratio * ratio;
         double v1 = toFill[originalNodeIDs[0] * totalMicroTicks + microTick];
         double v2 = toFill[originalNodeIDs[originalNodeIDs.length - 1] * totalMicroTicks + microTick];
-        double current = (v1 - v2) / totalResistance;
-        current -= currentSource;
+        double vd = (v1 - v2);
+        double current = vd / totalResistance;
+        current -= (currentSource / ratio);
         double currentVoltage = v1;
         for (int i = 0; i < originalResistances.length; i++) {
             int nextNodeID = originalNodeIDs[i + 1];

@@ -1,10 +1,9 @@
 package com.george_vi.electroenergetics.simulation.infrastructure;
 
-import com.george_vi.electroenergetics.foundation.nodes.InWorldNode;
 import com.george_vi.electroenergetics.foundation.nodes.Node;
 import com.george_vi.electroenergetics.simulation.CircuitBuilder;
 import com.george_vi.electroenergetics.simulation.SimulationResults;
-import com.george_vi.electroenergetics.simulation.WrappedIndexedNode;
+import com.george_vi.electroenergetics.simulation.SimulationNode;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -68,8 +67,8 @@ public class ConnectionEntry {
         // Very messy stuff but hopefully fast
 
         CircuitBuilder circuitBuilder = results.circuitBuilder;
-        List<WrappedIndexedNode> allIndexedNodes = circuitBuilder.allNodes();
-        WrappedIndexedNode wn1;
+        List<SimulationNode> allIndexedNodes = circuitBuilder.allNodes();
+        SimulationNode wn1;
         if (lastID1 >= 0 && lastID1 < allIndexedNodes.size()) {
             wn1 = allIndexedNodes.get(lastID1);
             if (!wn1.node.equals(node1))
@@ -80,7 +79,7 @@ public class ConnectionEntry {
             return 0;
         lastID1 = wn1.ordinal;
 
-        WrappedIndexedNode wn2;
+        SimulationNode wn2;
         if (lastID2 >= 0 && lastID2 < allIndexedNodes.size()) {
             wn2 = allIndexedNodes.get(lastID2);
             if (!wn2.node.equals(node2))

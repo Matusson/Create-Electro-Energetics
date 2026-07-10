@@ -1,45 +1,49 @@
 package com.george_vi.electroenergetics.foundation.electrical_properties;
 
-import com.george_vi.electroenergetics.simulation.electrical_properties.MicroTickingElectricalProperties;
+import com.george_vi.electroenergetics.simulation.electrical_properties.NonlinearProperties;
+import com.george_vi.electroenergetics.simulation.util.SparseMatrix;
 import net.minecraft.util.Mth;
 
-public class DiodeProperties extends MicroTickingElectricalProperties {
+public class DiodeProperties extends NonlinearProperties {
 
-    /**
-     * <p>This is a saved state for the diode that defines its state.</p>
-     * <p>Read only during the postTick phase.</p>
-     * <p>Write only during the preTick phase.</p>
-     */
-    public double lastVoltage;
+    public final double thermalVoltage;
+    public final double saturationCurrent;
 
-    @Override
-    public void tick(double[] allVoltages, int microTick, int totalMicroTicks, int n1, int n2) {
-        tickDiode(totalMicroTicks);
+    public DiodeProperties(double thermalVoltage, double saturationCurrent) {
+        this.thermalVoltage = thermalVoltage;
+        this.saturationCurrent = saturationCurrent;
     }
 
     @Override
-    public void afterTick(double[] allVoltages, int n1, int n2, int microTick, int totalMicroTicks) {
-        lastVoltage =
-                allVoltages[n2 * totalMicroTicks + microTick] -
-                allVoltages[n1 * totalMicroTicks + microTick];
+    public void stampNonLinear(double v1, double v2, SparseMatrix matrix, double[] rhs, int n1, int n2) {
+        double vd = v2 - v1;
+
+        double expVal = safeExp(vd / thermalVoltage);
+
+        double Id = saturationCurrent * (expVal - 1.0);
+
+        double gd = (saturationCurrent / thermalVoltage) * expVal;
+
+        double Ieq = Id - gd * vd;
+
+        double gMin = 1e-6d;
+        matrix.add(n1, n1, gd + gMin);
+        matrix.add(n2, n2, gd + gMin);
+        matrix.add(n1, n2, -gd);
+        matrix.add(n2, n1, -gd);
+
+        rhs[n1] -= Ieq;
+        rhs[n2] += Ieq;
     }
 
-    private void tickDiode(int totalMicroTicks) {
-        // i vibecoded this
-        double iS = 10e-10d;
-        double vT = 0.050;
+    double safeExp(double x) {
+        double limit = 13.0;
 
-        lastVoltage = Mth.clamp(lastVoltage, -0.8, 0.8);
+        if (x <= limit)
+            return Math.exp(x);
 
-        double Cj = 1e-11d;
-        double gCap = Cj / (0.05 / totalMicroTicks);
-        double iEqCap = gCap * lastVoltage;
+        double dx = x - limit;
 
-        double g = Math.max(1e-12d, (iS / vT) * Math.exp(lastVoltage / vT)) + gCap;
-
-        double resistance = 1 / g;
-        double currentSource = iS * (Math.exp(lastVoltage / vT) - 1) - g * lastVoltage;
-        this.resistance = resistance;
-        this.currentSource = currentSource + iEqCap;
+        return Math.exp(limit) * (1 + dx + 0.5 * dx * dx);
     }
 }

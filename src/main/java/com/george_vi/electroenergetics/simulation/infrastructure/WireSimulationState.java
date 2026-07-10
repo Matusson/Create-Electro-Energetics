@@ -3,7 +3,7 @@ package com.george_vi.electroenergetics.simulation.infrastructure;
 import com.george_vi.electroenergetics.foundation.QuadraticWireHelper;
 import com.george_vi.electroenergetics.foundation.nodes.*;
 import com.george_vi.electroenergetics.simulation.CircuitBuilder;
-import com.george_vi.electroenergetics.simulation.WrappedIndexedNode;
+import com.george_vi.electroenergetics.simulation.SimulationNode;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntStack;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -34,7 +34,7 @@ public class WireSimulationState {
     private final List<ObjectDoublePair<DirectionalNodeConnection>> lazyConnections = new ArrayList<>();
     private boolean reloadLazy = true;
 
-    private List<WrappedIndexedNode> allLazyIndexedNodes = new ArrayList<>();
+    private List<SimulationNode> allLazyIndexedNodes = new ArrayList<>();
     private Object2IntOpenHashMap<Node> lazyIndexedNodeIndexes = new Object2IntOpenHashMap<>();
     private int id = 0;
 
@@ -75,7 +75,7 @@ public class WireSimulationState {
         lazyIndexedNodeIndexes = new Object2IntOpenHashMap<>(nodes.size() * 2);
         lazyIndexedNodeIndexes.defaultReturnValue(-1);
         for (Node node : nodes) {
-            WrappedIndexedNode indexedNode = new WrappedIndexedNode(node, id);
+            SimulationNode indexedNode = new SimulationNode(node, id);
             allLazyIndexedNodes.add(indexedNode);
             lazyIndexedNodeIndexes.put(node, id);
             id++;
@@ -83,7 +83,7 @@ public class WireSimulationState {
     }
 
     public CircuitBuilder createCircuitBuilder() {
-        for (WrappedIndexedNode node : allLazyIndexedNodes)
+        for (SimulationNode node : allLazyIndexedNodes)
             node.clear();
 
         return new CircuitBuilder(id, allLazyIndexedNodes, lazyIndexedNodeIndexes);

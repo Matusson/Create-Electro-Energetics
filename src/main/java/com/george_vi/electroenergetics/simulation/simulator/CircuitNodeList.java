@@ -7,18 +7,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Arrays;
 
 /**
- * not used yet
- * <br>
  * The primary objective of this class is to hold node and circuit graph data.
  * <br>
  * It's done as flat arrays to help with cache locality during iterations such as DFS
  * (SOA is better than AOS)
- * <br>
- * Terminology:
- * <br>
- * - Circuit - The complete graph of a circuit. Can consist of multiple current domains, which can be isolated.
- * <br>
- * - Current domain - Isolated part of a circuit. Current can flow freely there.
  */
 public class CircuitNodeList {
     private int totalNodes = 0;
@@ -180,6 +172,35 @@ public class CircuitNodeList {
 
     public int totalNodes() {
         return totalNodes;
+    }
+
+    public Int2ObjectMap<ElectricalProperties> getNeighbors(int nodeID) {
+        checkID(nodeID);
+        Int2ObjectMap<ElectricalProperties> out = new Int2ObjectOpenHashMap<>(nodeDegree[nodeID]);
+        for (int i = 0; i < 4; i++) {
+            int adj1 = adjacentNodes[nodeID * 4 + i];
+            if (adj1 == -1) {
+                // stored in the other object
+                // it's safe to assume i == 0
+                return nodes[nodeID].adjacency;
+            }
+
+            if (adj1 == 0)
+                break;
+
+            double resistance = adjacentResistances[nodeID * 4 + i];
+            if (resistance == -1) {
+                out.put(adj1 - 1, adjacentProperties[nodeID * 4 + i]);
+            } else {
+                out.put(adj1 - 1, ElectricalProperties.resistor(resistance));
+            }
+        }
+        return out;
+    }
+
+    public double getGroundConductance(int nodeID) {
+        checkID(nodeID);
+        return nodeGroundConductance[nodeID];
     }
 
     public static class CircuitNode {

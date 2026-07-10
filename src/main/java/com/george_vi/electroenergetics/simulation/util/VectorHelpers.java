@@ -15,6 +15,14 @@ public class VectorHelpers {
         return Math.sqrt(sum);
     }
 
+    public static double maxDiff(double[] a, double[] b) {
+        double max = 0;
+        for (int i = 0; i < Math.min(a.length, b.length); i++) {
+            max = Math.max(max, Math.abs(a[i] - b[i]));
+        }
+        return max;
+    }
+
     public static void applyJacobiPreconditionerInto(SparseMatrix A, double[] v, double[] z) {
         for (int i = 0; i < v.length; i++) {
             double diagonal = A.getValue(i, i);

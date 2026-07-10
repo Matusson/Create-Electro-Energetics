@@ -80,10 +80,11 @@ public class ElectricalPanelBlock extends SimpleElectricalDeviceBlock<Electrical
     public @Nullable BlockState getStateForPlacement(@NotNull BlockPlaceContext context) {
         BlockState below = context.getLevel().getBlockState(context.getClickedPos().below());
         BlockState above = context.getLevel().getBlockState(context.getClickedPos().above());
+        Direction facing = context.getHorizontalDirection().getOpposite();
         return withWater(defaultBlockState()
-                .setValue(FACING, context.getHorizontalDirection().getOpposite())
-                .setValue(BOTTOM, below.getBlock() != this)
-                .setValue(TOP, above.getBlock() != this),
+                .setValue(FACING, facing)
+                .setValue(BOTTOM, below.getBlock() != this || below.getValue(FACING) != facing)
+                .setValue(TOP, above.getBlock() != this || above.getValue(FACING) != facing),
                 context);
     }
 
@@ -123,8 +124,8 @@ public class ElectricalPanelBlock extends SimpleElectricalDeviceBlock<Electrical
 
         updateWater(level, state, pos);
 
-        boolean bottom = below.getBlock() != this;
-        boolean top = above.getBlock() != this;
+        boolean bottom = below.getBlock() != this || below.getValue(FACING) != state.getValue(FACING);
+        boolean top = above.getBlock() != this || above.getValue(FACING) != state.getValue(FACING);
 
         return state.setValue(BOTTOM, bottom)
                 .setValue(TOP, top);

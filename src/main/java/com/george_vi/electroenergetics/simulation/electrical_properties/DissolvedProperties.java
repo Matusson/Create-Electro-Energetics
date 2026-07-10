@@ -1,6 +1,6 @@
 package com.george_vi.electroenergetics.simulation.electrical_properties;
 
-import com.george_vi.electroenergetics.simulation.WrappedIndexedNode;
+import com.george_vi.electroenergetics.simulation.SimulationNode;
 
 import java.util.Collection;
 
@@ -10,10 +10,10 @@ public class DissolvedProperties extends ElectricalProperties implements IDissol
     private double resistance = 0;
 
 
-    public DissolvedProperties(Collection<WrappedIndexedNode> originalNodes, Collection<ElectricalProperties> originalResistances) {
+    public DissolvedProperties(Collection<SimulationNode> originalNodes, Collection<ElectricalProperties> originalResistances) {
         this.originalNodeIDs = new int[originalNodes.size()];
         int i = 0;
-        for (WrappedIndexedNode node : originalNodes)
+        for (SimulationNode node : originalNodes)
             this.originalNodeIDs[i++] = node.ordinal;
 
         this.originalResistances = new double[originalResistances.size()];

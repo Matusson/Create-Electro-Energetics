@@ -67,12 +67,12 @@ public class VariacDevice extends SimpleElectricalDevice {
         InWorldNode primaryDivNode = new InWorldNode(PRIMARY_DIV, pos);
         TransformerElectricalProperties ep = new TransformerElectricalProperties(1 / windingRatio,
                 new DirectionalNodeConnection(commonNode, primaryDivNode),
-                new DirectionalNodeConnection(wiperDivNode, wiperNode));
+                new DirectionalNodeConnection(commonNode, wiperDivNode));
 
         bridges.bridge(primaryNode, primaryDivNode, ElectricalProperties.resistor(RESISTANCE));
-        bridges.bridge(wiperDivNode, commonNode, ElectricalProperties.resistor(RESISTANCE));
+        bridges.bridge(wiperDivNode, wiperNode, ElectricalProperties.resistor(RESISTANCE));
         bridges.bridge(primaryDivNode, commonNode, ep);
-        bridges.bridge(wiperDivNode, wiperNode, ep.getOtherProperties());
+        bridges.bridge(commonNode, wiperDivNode, ep.getOtherProperties());
     }
 
     @Override

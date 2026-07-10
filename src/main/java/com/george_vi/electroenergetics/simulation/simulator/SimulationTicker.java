@@ -9,19 +9,14 @@ import com.george_vi.electroenergetics.events.FinishElectricSimulationEvent;
 import com.george_vi.electroenergetics.foundation.device.TickingElectricalDevice;
 import com.george_vi.electroenergetics.foundation.nodes.DirectionalNodeConnection;
 import com.george_vi.electroenergetics.foundation.nodes.InWorldNode;
-import com.george_vi.electroenergetics.foundation.nodes.Node;
 import com.george_vi.electroenergetics.simulation.*;
-import com.george_vi.electroenergetics.simulation.electrical_properties.AdvancedDissolvedProperties;
 import com.george_vi.electroenergetics.simulation.electrical_properties.ElectricalProperties;
 import com.george_vi.electroenergetics.simulation.electrical_properties.MicroTickingElectricalProperties;
 import com.george_vi.electroenergetics.simulation.infrastructure.InfrastructureSavedData;
-import com.george_vi.electroenergetics.simulation.util.CholeskySolver;
 import com.george_vi.electroenergetics.simulation.util.DataPacker;
-import com.george_vi.electroenergetics.simulation.util.LUSolver;
 import com.george_vi.electroenergetics.simulation.util.SimulatorProfiler;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
-import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.core.BlockPos;
@@ -124,25 +119,24 @@ public class SimulationTicker {
         stats = new SimulationStats();
         future = electricalExecutorService.submit(() -> {
             circuitBuilder.connectAll(wiresToJoin);
-            List<List<WrappedIndexedNode>> networks = circuitBuilder.dfsAndGround();
+            List<List<SimulationNode>> networks = circuitBuilder.dfsAndGround();
             stats.totalNodes = circuitBuilder.allNodes().size();
             stats.totalSeparatedNodes = new int[networks.size()];
             stats.totalOptimizedNodes = new int[networks.size()];
             stats.totalDevices = devices.size();
-            long solveNanos = 0;
             // Solve
             double[] allVoltages = new double[circuitBuilder.allNodes().size() * microTicks];
             Map<BlockPos, Object2DoubleMap<DirectionalNodeConnection>> sourceAmps = new HashMap<>();
 
             List<Network> allNetworks = new ArrayList<>(networks.size());
             int l = 0;
-            for (List<WrappedIndexedNode> networkNodes : networks) {
+            for (List<SimulationNode> networkNodes : networks) {
                 if (networkNodes.size() == 1)
                     continue;
                 if (networkNodes.size() == 2) {
-                    Iterator<WrappedIndexedNode> iterator = networkNodes.iterator();
-                    WrappedIndexedNode node1 = iterator.next();
-                    WrappedIndexedNode node2 = iterator.next();
+                    Iterator<SimulationNode> iterator = networkNodes.iterator();
+                    SimulationNode node1 = iterator.next();
+                    SimulationNode node2 = iterator.next();
                     ElectricalProperties properties = node1.adjacency.get(node2.ordinal);
                     if (properties.isSimpleResistor())
                         continue;
@@ -150,7 +144,7 @@ public class SimulationTicker {
 
                 boolean foundSource = false;
                 NodeLoop:
-                for (WrappedIndexedNode node : networkNodes) {
+                for (SimulationNode node : networkNodes) {
                     for (ElectricalProperties properties : node.adjacency.values()) {
                         if (!properties.isSimpleResistor()) {
                             foundSource = true;
@@ -171,13 +165,13 @@ public class SimulationTicker {
                 l++;
                 network.mapToSimNodes();
                 allNetworks.add(network);
-                stats.totalMicroTickers += network.microTicked.size();
+                stats.totalMicroTickers += network.simulationMicroTicked.size();
             }
             long solveStart = System.nanoTime();
 
             for (int i = 0; i < microTicks; i++) {
                 for (Network network : allNetworks) {
-                    for (Long2ObjectMap.Entry<ElectricalProperties> entry : network.simulationMicroTicked.long2ObjectEntrySet()) {
+                    for (Long2ObjectMap.Entry<ElectricalProperties> entry : network.originalMicroTicked.long2ObjectEntrySet()) {
                         int first = DataPacker.unpackFirstI(entry.getLongKey());
                         int second = DataPacker.unpackSecondI(entry.getLongKey());
                         if (entry.getValue() instanceof MicroTickingElectricalProperties properties) {
@@ -186,29 +180,10 @@ public class SimulationTicker {
                     }
                 }
                 for (Network network : allNetworks) {
-                    network.formMatrix();
-                    double[] mnaResults;
-
-                    if (network.voltageSourcesInMatrix)
-                        mnaResults = LUSolver.solve(network.conductanceMatrix, network.rhsVector);
-                    else
-                        mnaResults = CholeskySolver.solve(network.conductanceMatrix, network.rhsVector);
-
-                    solveNanos += (System.nanoTime() - solveNanos);
-                    network.getResults(mnaResults, allVoltages, i, microTicks);
-                    int j = 0;
-                    for (long packedConnection : network.voltageSources.keySet()) {
-                        double amps = mnaResults[network.simulationNodes.length + j];
-                        Node first = network.simulationNodes[DataPacker.unpackFirstI(packedConnection)].correspondingNode.node;
-                        Node second = network.simulationNodes[DataPacker.unpackSecondI(packedConnection)].correspondingNode.node;
-                        if (first instanceof InWorldNode iwn1 && second instanceof InWorldNode iwn2)
-                            sourceAmps.computeIfAbsent(iwn1.sourcePos(), p -> new Object2DoubleOpenHashMap<>())
-                                    .put(new DirectionalNodeConnection(iwn1, iwn2), amps);
-                        j++;
-                    }
+                    network.runSolver(allVoltages, i, microTicks);
                 }
                 for (Network network : allNetworks) {
-                    for (Long2ObjectMap.Entry<ElectricalProperties> entry : network.simulationMicroTicked.long2ObjectEntrySet()) {
+                    for (Long2ObjectMap.Entry<ElectricalProperties> entry : network.originalMicroTicked.long2ObjectEntrySet()) {
                         int first = DataPacker.unpackFirstI(entry.getLongKey());
                         int second = DataPacker.unpackSecondI(entry.getLongKey());
                         if (entry.getValue() instanceof MicroTickingElectricalProperties properties) {
@@ -218,12 +193,9 @@ public class SimulationTicker {
                 }
             }
 
-            Object2DoubleMap<DirectionalNodeConnection> allSourceAmps = new Object2DoubleOpenHashMap<>();
-            for (Object2DoubleMap<DirectionalNodeConnection> v : sourceAmps.values())
-                allSourceAmps.putAll(v);
             profiler.addThreadedNanos(System.nanoTime() - thrStart);
             profiler.addSolverNanos(System.nanoTime() - solveStart);
-            return new SimulationResults(allVoltages, microTicks, allSourceAmps, circuitBuilder, sd);
+            return new SimulationResults(allVoltages, microTicks, circuitBuilder, sd);
         });
     }
 
