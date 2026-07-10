@@ -2,6 +2,7 @@ package com.george_vi.electroenergetics.content.energy_meter;
 
 import com.george_vi.electroenergetics.CEEBlockEntityTypes;
 import com.george_vi.electroenergetics.compat.computercraft.CCProxy;
+import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -84,10 +85,12 @@ public class EnergyMeterBlockEntity extends SmartBlockEntity {
     }
 
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                PeripheralCapability.get(),
-                CEEBlockEntityTypes.ENERGY_METER.get(),
-                (be, context) -> be.computerBehaviour.getPeripheralCapability()
-        );
+        if (Mods.COMPUTERCRAFT.isLoaded()) {
+            event.registerBlockEntity(
+                    PeripheralCapability.get(),
+                    CEEBlockEntityTypes.ENERGY_METER.get(),
+                    (be, context) -> be.computerBehaviour.getPeripheralCapability()
+            );
+        }
     }
 }
