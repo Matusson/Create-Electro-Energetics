@@ -1,7 +1,6 @@
 package com.george_vi.electroenergetics.content.wire.interaction;
 
 import com.george_vi.electroenergetics.CEERegistries;
-import com.george_vi.electroenergetics.CEETags;
 import com.george_vi.electroenergetics.client.WireRenderer;
 import com.george_vi.electroenergetics.content.electrical_panel.ElectricalPanelBlock;
 import com.george_vi.electroenergetics.content.wire_spool.WireApplyingBehaviour;
@@ -11,7 +10,7 @@ import com.george_vi.electroenergetics.foundation.nodes.NodeConnectionPoint;
 import com.george_vi.electroenergetics.simulation.infrastructure.WireData;
 import net.createmod.catnip.data.Pair;
 import net.createmod.catnip.math.VecHelper;
-import net.createmod.catnip.outliner.Outliner;
+import net.createmod.catnip.outliner.Outline;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -32,7 +31,8 @@ import java.util.Optional;
 public class WireInteractionHandler {
     public static boolean preventUseOnBlockPacket = false;
     public static NodeConnectionPoint targetedPoint = null;
-    public static Vec3 targetedPos = Vec3.ZERO;
+    public static OutlinesOnWireRenderer.PosOnWire targetedPos = new OutlinesOnWireRenderer.PosOnWire();
+    // Just a data container, so tick() won't be called
 
     @OnlyIn(Dist.CLIENT)
     public static void tick() {
@@ -147,8 +147,8 @@ public class WireInteractionHandler {
         }
 
         targetedPoint = new NodeConnectionPoint(bestConnection.node1(), bestConnection.node2(), bestProgress);
-        Vec3 pos1 = targetedPoint.node1().getPosition(mc.level);
-        Vec3 pos2 = targetedPoint.node2().getPosition(mc.level);
+        Vec3 pos1 = targetedPoint.node1().getPositionNoSable(mc.level);
+        Vec3 pos2 = targetedPoint.node2().getPositionNoSable(mc.level);
 
         if (!behaviour.isActuallyActiveFor(targetedPoint, mc.level, mc.player, stackInHand)) {
             targetedPoint = null;
@@ -159,30 +159,24 @@ public class WireInteractionHandler {
         if (pos1 == null || pos2 == null)
             return;
 
-        bestPosition = QuadraticWireHelper.posAt(pos1, pos2, targetedPoint.point(), bestWireData.getSag(bestWirePointDistance));
-        targetedPos = bestPosition;
+        OutlinesOnWireRenderer.Positions pos = new OutlinesOnWireRenderer.Positions(pos1,pos2);
+        targetedPos.setPos(pos);
+        targetedPos.setArguments(targetedPoint.point(), bestWireData.getSag(bestWirePointDistance));
+
         WireInteractionBehaviour.DisplayType displayType = behaviour.getWireDisplayType(targetedPoint, mc.level, mc.player, stackInHand);
         if (displayType == WireInteractionBehaviour.DisplayType.DOT) {
-            Outliner.getInstance()
-                    .chaseAABB("cee_wire_interaction_point", AABB.ofSize(bestPosition, 0.01, 0.01, 0.01))
+            OutlinesOnWireRenderer.OutlinerExt.chaseAABBOnWire("cee_wire_interaction_point", AABB.ofSize(Vec3.ZERO, 0.01, 0.01, 0.01),
+                    pos, targetedPoint.point(), bestWireData.getSag(bestWirePointDistance))
                     .lineWidth(0.15f)
                     .colored(behaviour.getWireDisplayColor(targetedPoint, mc.level, mc.player, stackInHand))
                     .disableLineNormals();
         } else if (displayType == WireInteractionBehaviour.DisplayType.LINE) {
-
-            List<Vec3> points = QuadraticWireHelper.cablePoints(pos1, pos2, bestWireData.getSag(bestWirePointDistance), 1f);
-            points.add(pos2);
-
-            for (int i = 0; i < points.size() - 1; i++) {
-                Vec3 point = points.get(i);
-                Vec3 nextPoint = points.get(i + 1);
-
-                Outliner.getInstance()
-                        .showLine("cee_wire_interaction_line_" + i, point, nextPoint)
-                        .lineWidth(0.07f * 16 * bestWireData.wireType().getThickness())
-                        .colored(behaviour.getWireDisplayColor(targetedPoint, mc.level, mc.player, stackInHand))
-                        .disableLineNormals();
-            }
+            float width = 0.07f * 16 * bestWireData.wireType().getThickness();
+            OutlinesOnWireRenderer.OutlinerExt.showWireOutline("cee_wire_interaction_line_", pos, bestWireData.getSag(bestWirePointDistance),1f,
+                    (Outline.OutlineParams obj)->obj
+                    .lineWidth(width)
+                    .colored(behaviour.getWireDisplayColor(targetedPoint, mc.level, mc.player, stackInHand))
+                    .disableLineNormals() );
         }
 
     }

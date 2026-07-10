@@ -19,6 +19,7 @@ import com.george_vi.electroenergetics.content.railway_electrification.gauges.Cl
 import com.george_vi.electroenergetics.content.railway_electrification.sound_effects.ElectricTrainSounds;
 import com.george_vi.electroenergetics.content.wire.WireSync;
 import com.george_vi.electroenergetics.content.wire.interaction.InteractDetachedNodePacket;
+import com.george_vi.electroenergetics.content.wire.interaction.OutlinesOnWireRenderer;
 import com.george_vi.electroenergetics.content.wire.interaction.WireInteractionBehaviour;
 import com.george_vi.electroenergetics.content.wire.interaction.WireInteractionHandler;
 import com.george_vi.electroenergetics.content.wire_spool.ChangeLengthWireInteractionBehaviour;
@@ -78,6 +79,7 @@ public class GameEvents {
             return;
         WireApplyingBehaviour.tick();
         WireInteractionHandler.tick();
+        OutlinesOnWireRenderer.OutlinerExt.tick();
         WireEffects.tick();
         CEEHoldInteractionHandler.tick();
         ElectricTrainSounds.tick();

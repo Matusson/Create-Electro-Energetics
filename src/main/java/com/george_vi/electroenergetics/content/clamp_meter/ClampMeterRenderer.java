@@ -1,18 +1,13 @@
 package com.george_vi.electroenergetics.content.clamp_meter;
 
 import com.george_vi.electroenergetics.CEEItems;
-import com.george_vi.electroenergetics.CEEPartialModels;
-import com.george_vi.electroenergetics.CEETags;
 import com.george_vi.electroenergetics.CreateElectroEnergetics;
 import com.george_vi.electroenergetics.content.linemans_stick.LinemansStickClientHandler;
-import com.george_vi.electroenergetics.content.wire.interaction.WireInteractionHandler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.foundation.item.render.CustomRenderedItemModel;
 import com.simibubi.create.foundation.item.render.CustomRenderedItemModelRenderer;
 import com.simibubi.create.foundation.item.render.PartialItemModelRenderer;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
-import dev.engine_room.flywheel.lib.transform.PoseTransformStack;
-import dev.engine_room.flywheel.lib.transform.TransformStack;
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.math.VecHelper;
 import net.createmod.catnip.render.CachedBuffers;
@@ -80,9 +75,7 @@ public class ClampMeterRenderer extends CustomRenderedItemModelRenderer {
                 -camera.getPosition().y() + base.y(),
                 -camera.getPosition().z() + base.z());
 
-        Vec3 hitPos = VecHelper.lerp(AnimationTickHolder.getPartialTicks(),
-                LinemansStickClientHandler.prevLinemansStickTarget,
-                LinemansStickClientHandler.linemansStickTarget);
+        Vec3 hitPos = LinemansStickClientHandler.linemansStickTarget.getHitPos(AnimationTickHolder.getPartialTicks());
 
         Vec3 diff = hitPos.subtract(base);
 

@@ -195,6 +195,11 @@ public class InWorldNode extends Node implements Comparable<InWorldNode> {
     }
 
     @Nullable
+    public Vec3 getPositionNoSable(Level level) {
+        return toGlobalPosNoSable(getLocalPosition(level), level);
+    }
+
+    @Nullable
     public Vec3 getLocalPosition(Level level) {
         if (DetachedNodeHelper.isDetached(this))
             return Vec3.ZERO;
