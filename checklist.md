@@ -18,14 +18,12 @@ This is a lot of content if you didn't notice. This is years of work if done *pr
 ### Electrical Engineering
 - Small alternators
 - Realistic grounding
-- Variac
 - Realistic surge protection & lightning strikes
 - Electromagnets
 - Solar panels
 - Medium Voltage switch
 ### Electronics
 - Transistors
-- Variacs
 - Pre Made ICs
 - Small DC motors - Operate at low voltage. Direction depends on voltage. Useful for controlling fluid valves, variacs, etc.
 - Redstone threshold activator - uses current or redstone to activate or deactivate a redstone signal. (Used for SF6 breakers)
@@ -34,13 +32,11 @@ This is a lot of content if you didn't notice. This is years of work if done *pr
 - Galvanic basin recipes 
 - Basin electrodes - allows for new recipe types using electricity
 - Zipline hook - Like IE skyhook
-- Electric doors - Buzz in door
 - A coil-gun-like weapon
 - Bundled cables
 - Voxel wires
 - SF6 breakers or HV switches can be linked together, which makes them activate as one
 - Electrical Panel
-- - Dyeable variants
 - - Variants with doors
 - - Variants with *(dyeable)* transparent doors
 ### Big, cool, heavy and complex machinery
@@ -51,6 +47,5 @@ This is a lot of content if you didn't notice. This is years of work if done *pr
 - Multiblock electric motors + electric motor nerf
 - The great alternator rework
 ### Integration
-- Energy meter peripheral
 - Direct TFMG compatibility
 - Direct(-ish) PG compatibility

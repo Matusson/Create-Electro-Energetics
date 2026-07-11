@@ -60,7 +60,7 @@ public class KineticUnlockableScrollValueBehaviour extends ScrollValueBehaviour 
     @Override
     public ValueSettings getValueSettings() {
         if (value >= 1_000_000)
-            return new ValueSettings(2, Math.abs(value));
+            return new ValueSettings(2, Math.abs(value - 1_000_000));
         return new ValueSettings(value < 0 ? 0 : 1, Math.abs(value));
     }
 

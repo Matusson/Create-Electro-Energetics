@@ -36,6 +36,14 @@ public class DiodeProperties extends NonlinearProperties {
         rhs[n2] += Ieq;
     }
 
+    /**
+     * exp() can return extremely large values for seemingly small values.
+     * Simply clamping the argument results in the derivative being non-continuous,
+     * which is terrible for Newton iteration.
+     * <br>
+     * This implementation doesn't clamp the result, instead it smooths it out for higher values,
+     * while keeping the derivative continuous.
+     */
     double safeExp(double x) {
         double limit = 13.0;
 
