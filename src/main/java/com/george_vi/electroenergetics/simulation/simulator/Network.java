@@ -14,7 +14,7 @@ import net.minecraft.util.Mth;
 import java.util.*;
 
 public class Network {
-    private static final int MAX_ITERATIONS = 20;
+    private static final int MAX_ITERATIONS = 100;
     final Set<SimulationNode> allNodes;
     final CircuitBuilder builder;
     final InfrastructureSavedData sd;
@@ -145,8 +145,11 @@ public class Network {
 
         conductanceMatrix = new SparseMatrix(size);
         rhsVector = new double[size];
-        if (x == null)
+        boolean firstIteration = false;
+        if (x == null) {
             x = new double[size];
+            firstIteration = true;
+        }
 
         for (int nodeID = 0; nodeID < optimizedNodeList.totalNodes(); nodeID++) {
             double totalConductance = 0;
@@ -167,9 +170,9 @@ public class Network {
                 }
 
                 if (properties instanceof NonlinearProperties nl) {
-                    nl.stampNonLinear(x[nodeID], x[neighborID], conductanceMatrix, rhsVector, nodeID, neighborID);
+                    nl.stampNonLinear(x[nodeID], x[neighborID], conductanceMatrix, rhsVector, nodeID, neighborID, firstIteration);
                 } if (properties instanceof NonLinearInvertedElectricalProperties nli) {
-                    nli.original.stampNonLinear(x[neighborID], x[nodeID], conductanceMatrix, rhsVector, neighborID, nodeID);
+                    nli.original.stampNonLinear(x[neighborID], x[nodeID], conductanceMatrix, rhsVector, neighborID, nodeID, firstIteration);
                 }
 
                 if (conductance == 0)
@@ -317,8 +320,8 @@ public class Network {
         double[] nodeGroundConductance = builder.nodeGroundConductance;
 
         for (int id : allOriginalNodeIDs) {
-            if (nodeGroundConductance[id] < 0) {
-                currentRegionZeroPotential[nodeCurrentRegionID[id]] = id;
+            if (nodeGroundConductance[id] != 0) {
+                currentRegionZeroPotential[nodeCurrentRegionID[id]] = toFill[id * totalMicroTicks + microTick];
             }
         }
 

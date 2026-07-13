@@ -214,8 +214,10 @@ public class CircuitBuilder {
                     foundGround = true;
                 }
 
-                if (foundGround)
+                if (foundGround) {
+                    highestPriorityGround = null;
                     continue;
+                }
 
                 int priority = defaultZeroPotentials.get(node.ordinal);
                 if (priority == highestPriority) {

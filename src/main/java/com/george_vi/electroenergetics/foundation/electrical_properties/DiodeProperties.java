@@ -2,12 +2,12 @@ package com.george_vi.electroenergetics.foundation.electrical_properties;
 
 import com.george_vi.electroenergetics.simulation.electrical_properties.NonlinearProperties;
 import com.george_vi.electroenergetics.simulation.util.SparseMatrix;
-import net.minecraft.util.Mth;
 
 public class DiodeProperties extends NonlinearProperties {
 
     public final double thermalVoltage;
     public final double saturationCurrent;
+    private double prevVoltage;
 
     public DiodeProperties(double thermalVoltage, double saturationCurrent) {
         this.thermalVoltage = thermalVoltage;
@@ -15,8 +15,10 @@ public class DiodeProperties extends NonlinearProperties {
     }
 
     @Override
-    public void stampNonLinear(double v1, double v2, SparseMatrix matrix, double[] rhs, int n1, int n2) {
-        double vd = v2 - v1;
+    public void stampNonLinear(double v1, double v2, SparseMatrix matrix, double[] rhs, int n1, int n2, boolean first) {
+        if (!first)
+            prevVoltage = v1 - v2;
+        double vd = prevVoltage;
 
         double expVal = safeExp(vd / thermalVoltage);
 
@@ -26,7 +28,7 @@ public class DiodeProperties extends NonlinearProperties {
 
         double Ieq = Id - gd * vd;
 
-        double gMin = 1e-6d;
+        double gMin = 1e-8d;
         matrix.add(n1, n1, gd + gMin);
         matrix.add(n2, n2, gd + gMin);
         matrix.add(n1, n2, -gd);

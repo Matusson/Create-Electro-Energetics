@@ -27,5 +27,5 @@ public abstract class NonlinearProperties extends ElectricalProperties {
         return inverted;
     }
 
-    public abstract void stampNonLinear(double v1, double v2, SparseMatrix matrix, double[] rhs, int n1, int n2);
+    public abstract void stampNonLinear(double v1, double v2, SparseMatrix matrix, double[] rhs, int n1, int n2, boolean first);
 }
