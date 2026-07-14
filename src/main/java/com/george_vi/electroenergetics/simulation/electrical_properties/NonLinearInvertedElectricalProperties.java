@@ -40,4 +40,9 @@ public final class NonLinearInvertedElectricalProperties extends ElectricalPrope
     public ElectricalProperties invert() {
         return original;
     }
+
+    @Override
+    public boolean canDissolve() {
+        return false;
+    }
 }

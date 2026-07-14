@@ -342,7 +342,7 @@ public class Network {
                 double[] res = new double[x.length];
                 conductanceMatrix.computeResidualInto(lastMNAResult, rhsVector, res);
                 double normSqr = VectorHelpers.normSqr(res);
-                if (normSqr < 1e-1d) {
+                if (normSqr < 1e-2d) {
                     getResults(lastMNAResult, allVoltages, microTick, totalMicroTicks);
                     break;
                 }
@@ -356,9 +356,7 @@ public class Network {
             if (x == null || x.length != mnaResults.length)
                 x = mnaResults.clone();
 
-            for (int j = 0; j < x.length; j++) {
-                x[j] = Mth.lerp(0.15, x[j], mnaResults[j]);
-            }
+            System.arraycopy(mnaResults, 0, x, 0, x.length);
 
             // Max iterations
             if (i >= MAX_ITERATIONS) {

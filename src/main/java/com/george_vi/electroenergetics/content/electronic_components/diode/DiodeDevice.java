@@ -22,14 +22,14 @@ public class DiodeDevice extends SimpleElectricalDevice {
     @Override
     public void preTick(BridgeCollector bridges) {
         bridges.builder(pos)
-                .connect(0, 1, properties);
+                .connect(1, 0, properties);
     }
 
     @Override
     public void read(CompoundTag tag) {
         lastVoltage = tag.getDouble("Voltage");
         temp = tag.getFloat("Temp");
-        properties = new DiodeProperties(0.02585, 1e-8);
+        properties = new DiodeProperties(0.02585, 1e-12);
     }
 
     @Override
