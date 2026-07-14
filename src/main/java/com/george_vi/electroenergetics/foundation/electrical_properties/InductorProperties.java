@@ -35,7 +35,7 @@ public class InductorProperties extends MicroTickingElectricalProperties {
         double inductance = Math.max(this.inductance, 1e-12d);
         double timeStep = 0.05 / totalMicroTicks;
 
-        lastCurrent += (voltage / inductance) * timeStep;
+        lastCurrent -= (voltage / inductance) * timeStep;
     }
 
     private void tickInductor(int totalMicroTicks) {

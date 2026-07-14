@@ -84,14 +84,6 @@ public class FrequencyMeterBlock extends SimpleElectricalDeviceBlock<FrequencyMe
     }
 
     @Override
-    public MutableComponent getNodeLabel(Level level, BlockPos pos, BlockState state, int id) {
-        int i = id % 3;
-        return i == 0 ? CEELang.nodeLabel("phase_1") :
-                i == 1 ? CEELang.nodeLabel("phase_2") :
-                        CEELang.nodeLabel("phase_3");
-    }
-
-    @Override
     public Class<FrequencyMeterBlockEntity> getBlockEntityClass() {
         return FrequencyMeterBlockEntity.class;
     }

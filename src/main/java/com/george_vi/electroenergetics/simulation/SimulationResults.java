@@ -80,7 +80,7 @@ public class SimulationResults {
             return 0;
         if (properties.isCurrentSource()) {
             if (microTicks == 1)
-                return getVoltageAt(node1, node2) / properties.resistance() + properties.currentSource();
+                return getVoltageAt(node1, node2) / properties.resistance() - properties.currentSource();
             int nodeId1 = circuitBuilder.nodeIndexes.getInt(node1);
             int nodeId2 = circuitBuilder.nodeIndexes.getInt(node2);
             if (nodeId1 == -1 || nodeId2 == -1)
