@@ -223,10 +223,8 @@ public class SimulationResults {
      */
     public int getNodeID(Node node, int hint) {
         List<SimulationNode> allIndexedNodes = circuitBuilder.allIndexedNodes;
-        if (hint >= 0 && hint < allIndexedNodes.size()) {
-            SimulationNode wn = allIndexedNodes.get(hint);
+        if (hint >= 0 && hint < allIndexedNodes.size())
             return hint;
-        }
         return circuitBuilder.nodeIndexes.getInt(node);
     }
 }

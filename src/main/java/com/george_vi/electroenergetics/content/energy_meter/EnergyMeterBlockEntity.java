@@ -31,7 +31,6 @@ public class EnergyMeterBlockEntity extends SmartBlockEntity {
         super(type, pos, state);
     }
 
-
     public double activePower = 0;
     public double totalEnergy = 0;
     public LerpedFloat smoothTotalEnergy = LerpedFloat.linear();
@@ -68,11 +67,15 @@ public class EnergyMeterBlockEntity extends SmartBlockEntity {
         totalEnergy = tag.getDouble("TotalEnergy");
         activePower = tag.getDouble("ActivePower");
         disconnected = tag.getBoolean("Disconnected");
-        if (tag.contains("Owner"))
-            owner = tag.getUUID("Owner");
+        setOwner(tag.contains("Owner") ? tag.getUUID("Owner") : null);
 
         if (clientPacket)
             smoothTotalEnergy.chase(totalEnergy, first ? 1 : 0.5, LerpedFloat.Chaser.EXP);
+    }
+
+    public void setOwner(UUID uuid) {
+        owner = uuid;
+        scale.setPlayerPredicate(u -> u.equals(owner));
     }
 
     @Override
