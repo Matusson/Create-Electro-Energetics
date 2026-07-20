@@ -11,6 +11,8 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 public enum CEEGuiTextures implements ScreenElement, TextureSheetSegment {
     ELECTRICAL_PANEL_LINK("electrical_panel_link", 72, 109),
+    TRANSFORMER("transformer", 120, 120),
+    TRANSFORMER_SWAP_SIDES("transformer", 0, 120, 14, 14),
     ENERGY_METER("energy_meter", 232, 120),
     ENERGY_METER_RESET("energy_meter",195, 121, 15, 16),
     ENERGY_METER_OPEN("energy_meter",211, 121, 15, 16),

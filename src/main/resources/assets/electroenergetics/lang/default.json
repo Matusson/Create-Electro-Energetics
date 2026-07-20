@@ -15,6 +15,13 @@
   "electroenergetics.action_bar.wire_too_long": "Wire too long!",
   "electroenergetics.action_bar.wire_too_short": "Wire too short!",
 
+  "electroenergetics.gui.transformer": "Configure Transformer Windings",
+  "electroenergetics.gui.transformer.primary_turns": "Primary Turns",
+  "electroenergetics.gui.transformer.secondary_turns": "Secondary Turns",
+  "electroenergetics.gui.transformer.turns_tip_1": "Scroll to Modify",
+  "electroenergetics.gui.transformer.turns_tip_2": "Shift to Scroll Faster",
+  "electroenergetics.gui.transformer.swap_sides": "Swap Sides",
+  "electroenergetics.gui.transformer.swap_sides_tip_1": "Click to swap Primary and Secondary",
   "electroenergetics.gui.energy_meter": "Energy Meter",
   "electroenergetics.gui.energy_meter.disconnected": "Power Disconnected",
   "electroenergetics.gui.energy_meter.connected": "Power Connected",

@@ -26,7 +26,6 @@ public class EnergyMeterScreen extends AbstractSimiScreen {
     int resetX;
     int resetY;
 
-
     EnergyMeterBlockEntity be;
     public EnergyMeterScreen(EnergyMeterBlockEntity be) {
         super(Component.translatable("electroenergetics.gui.energy_meter"));

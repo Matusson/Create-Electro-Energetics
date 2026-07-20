@@ -8,6 +8,7 @@ import com.george_vi.electroenergetics.content.railway_electrification.catenary.
 import com.george_vi.electroenergetics.content.railway_electrification.gauges.SyncTrainGaugeDataPacket;
 import com.george_vi.electroenergetics.content.railway_electrification.sound_effects.ChangeTrainSoundTypePacket;
 import com.george_vi.electroenergetics.content.railway_electrification.sound_effects.UpdateElectricTrainSoundPacket;
+import com.george_vi.electroenergetics.content.transmission_distribution.transformer.ConfigureTransformerAttachmentPacket;
 import com.george_vi.electroenergetics.content.wire.*;
 import com.george_vi.electroenergetics.content.wire.interaction.InteractDetachedNodePacket;
 import com.george_vi.electroenergetics.content.wire.interaction.InteractWirePacket;
@@ -35,6 +36,7 @@ public enum CEEPackets implements BasePacketPayload.PacketTypeProvider {
     CHANGE_LENGTH(ChangeLengthWirePacket.class, ChangeLengthWirePacket.STREAM_CODEC),
     INTERACT_DETACHED_NODE(InteractDetachedNodePacket.class, InteractDetachedNodePacket.STREAM_CODEC),
     CHANGE_ENERGY_METER_STATE(ChangeEnergyMeterStatePacket.class, ChangeEnergyMeterStatePacket.STREAM_CODEC),
+    CONFIGURE_TRANSFORMER_ATTACHMENT(ConfigureTransformerAttachmentPacket.class, ConfigureTransformerAttachmentPacket.STREAM_CODEC),
     UPDATE_ELECTRIC_TRAIN_SOUND(UpdateElectricTrainSoundPacket.class, UpdateElectricTrainSoundPacket.STREAM_CODEC),
     CHANGE_TRAIN_SOUND_TYPE(ChangeTrainSoundTypePacket.class, ChangeTrainSoundTypePacket.STREAM_CODEC),
     SEND_SPARK(SendSparkPacket.class, SendSparkPacket.STREAM_CODEC),

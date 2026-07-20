@@ -33,19 +33,19 @@ public class CEEPanelAttachmentTypes {
             .register("emergency_stop_button", () -> new PanelAttachmentType(EStopPanelAttachment::new, CEEBlocks.EMERGENCY_STOP_BUTTON, PanelAttachmentMode.HALF));
 
     public static final DeferredHolder<PanelAttachmentType, PanelAttachmentType> CUT_OFF_SWITCH = PANEL_ATTACHMENT_TYPE
-            .register("cut_off_switch", () -> new PanelAttachmentType(CutOffSwitchPanelAttachment::new, CEEBlocks.CUT_OFF_SWITCH, PanelAttachmentMode.HALF_OR_THIRD_OR_SMOL));
+            .register("cut_off_switch", () -> new PanelAttachmentType(CutOffSwitchPanelAttachment::new, CEEBlocks.CUT_OFF_SWITCH, PanelAttachmentMode.HALF_OR_THIRD_OR_SIXTH));
 
     public static final DeferredHolder<PanelAttachmentType, PanelAttachmentType> ANALOG_LEVER = PANEL_ATTACHMENT_TYPE
-            .register("analog_lever", () -> new PanelAttachmentType(AnalogLeverPanelAttachment::new, AllBlocks.ANALOG_LEVER, PanelAttachmentMode.HALF_OR_THIRD_OR_SMOL_NONE));
+            .register("analog_lever", () -> new PanelAttachmentType(AnalogLeverPanelAttachment::new, AllBlocks.ANALOG_LEVER, PanelAttachmentMode.HALF_OR_THIRD_OR_SIXTH));
 
     public static final DeferredHolder<PanelAttachmentType, PanelAttachmentType> STEERING_WHEEL = PANEL_ATTACHMENT_TYPE
             .register("steering_wheel", () -> new PanelAttachmentType(SteeringWheelPanelAttachment::new, AllBlocks.TURNTABLE, PanelAttachmentMode.QUARTER_NONE));
 
     public static final DeferredHolder<PanelAttachmentType, PanelAttachmentType> INDICATOR_BULB = PANEL_ATTACHMENT_TYPE
-            .register("indicator_bulb", () -> new PanelAttachmentType(IndicatorBulbPanelAttachment::new, CEEBlocks.INDICATOR_BULB, PanelAttachmentMode.HALF_OR_THIRD_OR_SMOL));
+            .register("indicator_bulb", () -> new PanelAttachmentType(IndicatorBulbPanelAttachment::new, CEEBlocks.INDICATOR_BULB, PanelAttachmentMode.HALF_OR_THIRD_OR_SIXTH));
 
     public static final DeferredHolder<PanelAttachmentType, PanelAttachmentType> MOMENTARY_SWITCH = PANEL_ATTACHMENT_TYPE
-            .register("momentary_switch", () -> new PanelAttachmentType(MomentarySwitchPanelAttachment::new, CEEBlocks.MOMENTARY_SWITCH, PanelAttachmentMode.HALF_OR_THIRD_OR_SMOL));
+            .register("momentary_switch", () -> new PanelAttachmentType(MomentarySwitchPanelAttachment::new, CEEBlocks.MOMENTARY_SWITCH, PanelAttachmentMode.HALF_OR_THIRD_OR_SIXTH));
 
     public static final DeferredHolder<PanelAttachmentType, PanelAttachmentType> ENERGY_METER = PANEL_ATTACHMENT_TYPE
             .register("energy_meter", () -> new PanelAttachmentType(EnergyMeterAttachment::new, CEEBlocks.ENERGY_METER, PanelAttachmentMode.FULL_DOUBLE));
@@ -55,6 +55,9 @@ public class CEEPanelAttachmentTypes {
 
     public static final DeferredHolder<PanelAttachmentType, PanelAttachmentType> MINIATURE_CIRCUIT_BREAKER = PANEL_ATTACHMENT_TYPE
             .register("miniature_circuit_breaker", () -> new PanelAttachmentType(MCBPanelAttachment::new, CEEItems.MINIATURE_CIRCUIT_BREAKER, PanelAttachmentMode.THIRD));
+
+    public static final DeferredHolder<PanelAttachmentType, PanelAttachmentType> TRANSFORMER = PANEL_ATTACHMENT_TYPE
+            .register("transformer", () -> new PanelAttachmentType(TransformerAttachment::new, CEEBlocks.TRANSFORMER, PanelAttachmentMode.SIXTH_QUAD));
 
     public static final DeferredHolder<PanelAttachmentType, PanelAttachmentType> ALTITUDE_SENSOR = PANEL_ATTACHMENT_TYPE
             .register("altitude_sensor", () -> new PanelAttachmentType(AltitudeSensorPanelAttachment::new, simItem(() -> SimBlocks.ALTITUDE_SENSOR), PanelAttachmentMode.FULL_NONE));

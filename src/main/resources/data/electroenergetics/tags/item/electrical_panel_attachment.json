@@ -9,6 +9,7 @@
     "electroenergetics:momentary_switch",
     "electroenergetics:indicator_bulb",
     "electroenergetics:miniature_circuit_breaker",
+    "electroenergetics:transformer",
 
     "create:analog_lever",
     "create:turntable",

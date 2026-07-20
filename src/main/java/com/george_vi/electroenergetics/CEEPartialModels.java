@@ -123,6 +123,9 @@ public class CEEPartialModels {
     public static final PartialModel PANEL_ATTACHMENT_VELOCITY_SENSOR = PartialModel.of(CreateElectroEnergetics.rl("block/electrical_panel/attachments/velocity_sensor"));
     public static final PartialModel PANEL_ATTACHMENT_VELOCITY_SENSOR_WIDE = PartialModel.of(CreateElectroEnergetics.rl("block/electrical_panel/attachments/velocity_sensor_wide"));
 
+    public static final PartialModel PANEL_ATTACHMENT_SMOL_TRANSFORMER = PartialModel.of(CreateElectroEnergetics.rl("block/electrical_panel/attachments/transformer"));
+    public static final PartialModel PANEL_ATTACHMENT_SMOL_TRANSFORMER_BLOWN = PartialModel.of(CreateElectroEnergetics.rl("block/electrical_panel/attachments/transformer_blown"));
+
     public static final PartialModel PANEL_ATTACHMENT_CUT_OFF_SWITCH = PartialModel.of(CreateElectroEnergetics.rl("block/electrical_panel/attachments/cut_off_switch"));
     public static final PartialModel PANEL_ATTACHMENT_TINY_SWITCH = PartialModel.of(CreateElectroEnergetics.rl("block/electrical_panel/attachments/tiny_switch"));
     public static final PartialModel PANEL_ATTACHMENT_CUT_OFF_SWITCH_LEVER = PartialModel.of(CreateElectroEnergetics.rl("block/electrical_panel/attachments/cut_off_switch_lever"));
