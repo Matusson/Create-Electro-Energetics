@@ -39,6 +39,7 @@ This is a lot of content if you didn't notice. This is years of work if done *pr
 - Electrical Panel
 - - Variants with doors
 - - Variants with *(dyeable)* transparent doors
+- - Electric fans on panels
 ### Big, cool, heavy and complex machinery
 - Electric Arc Furnace - an actually large and realistic(-ish) one
 - - Electrodes

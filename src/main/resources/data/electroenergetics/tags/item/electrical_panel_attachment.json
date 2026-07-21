@@ -10,6 +10,7 @@
     "electroenergetics:indicator_bulb",
     "electroenergetics:miniature_circuit_breaker",
     "electroenergetics:transformer",
+    "electroenergetics:electric_fan",
 
     "create:analog_lever",
     "create:turntable",

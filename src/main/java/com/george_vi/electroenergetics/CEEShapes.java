@@ -71,6 +71,9 @@ public class CEEShapes {
             .add(AllShapes.SIX_VOXEL_POLE.get(Direction.Axis.Y))
             .forDirectional();
 
+    public static final VoxelShaper ELECTRIC_FAN = shape(0,6, 0,16,10,16)
+            .add(5, 3, 5, 11, 11, 11).forDirectional();
+
     public static final VoxelShaper CONVERTER = shape(0, 0, 0, 16, 5, 16).forDirectional();
 
     public static final VoxelShaper POLE_MOUNT = shape(5, 13, 5, 11, 16, 11)

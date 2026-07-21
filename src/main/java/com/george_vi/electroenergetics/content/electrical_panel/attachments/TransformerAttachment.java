@@ -2,6 +2,7 @@ package com.george_vi.electroenergetics.content.electrical_panel.attachments;
 
 import com.george_vi.electroenergetics.CEEPartialModels;
 import com.george_vi.electroenergetics.CreateElectroEnergetics;
+import com.george_vi.electroenergetics.config.CEEConfigs;
 import com.george_vi.electroenergetics.content.electrical_panel.ElectricalPanelBlockEntity;
 import com.george_vi.electroenergetics.content.transmission_distribution.transformer.TransformerElectricalProperties;
 import com.george_vi.electroenergetics.content.transmission_distribution.transformer.TransformerScreen;
@@ -134,13 +135,12 @@ public class TransformerAttachment extends PanelAttachment {
             double ip = (inverted ? results.getVoltageAt(nodes[1], secondaryDivNode) : results.getVoltageAt(nodes[0], primaryDivNode)) / 0.1;
             power = ip * vdp;
 
-            this.temp = ElectricalDevice.updateTemp(this.temp, (float) Math.min(70_000, Math.abs(power)) / 10);
-
             rmsPrimaryVoltages.add(vdp);
             rmsSecondaryVoltages.add(sdp);
         }
         primaryVoltage = rmsPrimaryVoltages.get();
         secondaryVoltage = rmsSecondaryVoltages.get();
+
         if (Math.abs(prevPrimaryVoltage - primaryVoltage) > 1 ||
                 Math.abs(prevSecondaryVoltage - secondaryVoltage) > 1 ||
                 Math.abs(prevPower - power) > 1) {
@@ -151,8 +151,11 @@ public class TransformerAttachment extends PanelAttachment {
             prevPower = power;
         }
 
+        double load = Math.abs(power) / CEEConfigs.server().powerValues.miniatureTransformerMaxPower.get();
 
-        if (this.temp > 7600) {
+        temp = ElectricalDevice.updateTemp(temp, (float) load * 1000);
+
+        if (this.temp > 30_000) {
             if (level.isLoaded(pos)) {
                 Vec3 center = getCenter();
                 CatnipServices.NETWORK.sendToClientsAround((ServerLevel) level, center, 40, new SendSparkPacket(center, SendSparkPacket.SparkSize.SMALL));
@@ -160,7 +163,7 @@ public class TransformerAttachment extends PanelAttachment {
             }
             temp = 0;
             blown = true;
-        } else if (this.temp > 6200) {
+        } else if (this.temp > 29_000) {
             Vec3 center = getCenter();
             if (level.random.nextFloat() > 0.8f)
                 ((ServerLevel)level).sendParticles(ParticleTypes.SMOKE, center.x, center.y, center.z, 5, 0.1, 0.1, 0.1, 0);
@@ -237,7 +240,7 @@ public class TransformerAttachment extends PanelAttachment {
         power = tag.getDouble("Power");
         inverted = tag.getBoolean("Inverted");
         blown = tag.getBoolean("Blown");
-        temp = tag.getFloat("Temp");
+        temp = tag.getFloat("Temp1");
         if (clientPacket)
             return;
 
@@ -261,7 +264,7 @@ public class TransformerAttachment extends PanelAttachment {
         tag.putDouble("PrimaryVoltage", primaryVoltage);
         tag.putDouble("SecondaryVoltage", secondaryVoltage);
         tag.putDouble("Power", power);
-        tag.putFloat("Temp", temp);
+        tag.putFloat("Temp1", temp);
         if (inverted)
             tag.putBoolean("Inverted", true);
         if (blown)

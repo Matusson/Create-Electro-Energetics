@@ -29,6 +29,9 @@ public class CEEPanelAttachmentTypes {
     public static final DeferredHolder<PanelAttachmentType, PanelAttachmentType> VOLTMETER = PANEL_ATTACHMENT_TYPE
             .register("voltmeter", () -> new PanelAttachmentType(GaugePanelAttachment::voltmeter, CEEBlocks.VOLTMETER, PanelAttachmentMode.HALF_OR_THIRD));
 
+    public static final DeferredHolder<PanelAttachmentType, PanelAttachmentType> FAN = PANEL_ATTACHMENT_TYPE
+            .register("fan", () -> new PanelAttachmentType(ElectricFanAttachment::new, CEEBlocks.ELECTRIC_FAN, PanelAttachmentMode.HALF_HORIZONTAL));
+
     public static final DeferredHolder<PanelAttachmentType, PanelAttachmentType> ESTOP = PANEL_ATTACHMENT_TYPE
             .register("emergency_stop_button", () -> new PanelAttachmentType(EStopPanelAttachment::new, CEEBlocks.EMERGENCY_STOP_BUTTON, PanelAttachmentMode.HALF));
 

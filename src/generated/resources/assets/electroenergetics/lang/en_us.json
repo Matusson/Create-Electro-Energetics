@@ -50,6 +50,7 @@
   "block.electroenergetics.double_connector": "Double Connector",
   "block.electroenergetics.double_switch": "Double Switch",
   "block.electroenergetics.duplex_wire_termination": "Duplex Wire Termination",
+  "block.electroenergetics.electric_fan": "Electric Fan",
   "block.electroenergetics.electric_pump": "Electric Pump",
   "block.electroenergetics.electric_shock_sign": "Electric Shock Sign",
   "block.electroenergetics.electrical_panel": "Electrical Panel",
