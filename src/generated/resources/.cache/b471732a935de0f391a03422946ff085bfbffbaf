@@ -1,4 +1,4 @@
-// 1.21.1	2026-07-21T20:11:38.292097214	Registrate Provider for electroenergetics [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (blocks), Tags (enchantments), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
+// 1.21.1	2026-07-22T13:52:09.138524652	Registrate Provider for electroenergetics [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (blocks), Tags (enchantments), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
 efaff624fae8f426c8927b933899a261b68f7685 assets/electroenergetics/blockstates/accumulator.json
 bc7e544079464f9fb40950d4499967da027b352f assets/electroenergetics/blockstates/alternator_brushes.json
 6b72c8deefc1f25685fbb695dfa33f40a78fa5a3 assets/electroenergetics/blockstates/alternator_rotor.json
@@ -28,7 +28,7 @@ d0aa351945f858beaa79435319a482218b6ddc7f assets/electroenergetics/blockstates/cu
 9357b49764714ba627b270248076175fb71ad443 assets/electroenergetics/blockstates/double_connector.json
 a8502765eeba2ac4241f7bb7e1fa2616f217cce1 assets/electroenergetics/blockstates/double_switch.json
 bffbc28f5fec23a58f705c832dcf8069989e5cff assets/electroenergetics/blockstates/duplex_wire_termination.json
-434cdb11e4173e765f460e861b66b42016ec3623 assets/electroenergetics/blockstates/electric_fan.json
+6d342c39ad53f1fd865a1fd32113f47edd754e68 assets/electroenergetics/blockstates/electric_fan.json
 0993cfeb0badd14a5fee3d5942be676c38bf7e76 assets/electroenergetics/blockstates/electric_pump.json
 5cdddebd1cb19990c46e41930eb66520a2b7bd80 assets/electroenergetics/blockstates/electric_shock_sign.json
 5deed645d46fb7f64c4c8889d8251c4d359284ce assets/electroenergetics/blockstates/electrical_panel.json

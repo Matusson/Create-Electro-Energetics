@@ -47,6 +47,7 @@ public class ElectricFanDevice extends SimpleElectricalDevice implements SimpleT
             signedPower += Math.signum(vd) * vd * vd / resistance;
         }
         power /= safeLength;
+        signedPower /= safeLength;
 
         if (Math.abs(signedPower) < 0.1)
             signedPower = 0;

@@ -26,6 +26,7 @@ public class ElectricFanBlockEntityRenderer extends SmartBlockEntityRenderer<Ele
                 .rotateYCenteredDegrees(facing.getAxis().isHorizontal() ? (int) facing.toYRot() : 0)
                 .rotateXCenteredDegrees(facing == Direction.DOWN ? 180 : facing.getAxis().isHorizontal() ? 270 : 0)
                 .rotateYCenteredDegrees(Mth.lerp(partialTicks, blockEntity.prevRotation, blockEntity.rotation))
+                .translate(0, state.getValue(ElectricFanBlock.FORWARD) ? -6/16f : 0, 0)
                 .renderInto(ms, buffer.getBuffer(RenderType.CUTOUT));
     }
 }

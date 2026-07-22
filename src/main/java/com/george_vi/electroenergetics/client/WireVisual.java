@@ -93,6 +93,8 @@ public class WireVisual implements EffectVisual<WireEffect>, LightUpdatedVisual,
                 visualizationContext.renderOrigin().getZ());
         prevPos1 = pos1;
         prevPos2 = pos2;
+
+        recreateInstances(0);
     }
 
     public void recreateInstances(float partialTick) {

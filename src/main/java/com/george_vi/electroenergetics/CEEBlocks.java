@@ -466,7 +466,7 @@ public class CEEBlocks {
             .tag(AllTags.AllBlockTags.SAFE_NBT.tag)
             .initialProperties(SharedProperties::softMetal)
             .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
-            .blockstate(DirectionalRolledDeviceBlock::generateBlockState)
+            .blockstate(DirectionalRolledDeviceBlock.generateBlockStateWithSuffix(bs -> bs.getValue(ElectricFanBlock.FORWARD) ? "forward" : ""))
             .transform(pickaxeOnly())
             .item()
             .model((c, p) -> p.blockItem(c::getEntry, "/item"))

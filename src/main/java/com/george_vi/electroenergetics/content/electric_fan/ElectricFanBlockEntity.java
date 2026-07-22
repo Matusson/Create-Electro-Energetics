@@ -167,7 +167,7 @@ public class ElectricFanBlockEntity extends SmartBlockEntity implements IAirCurr
 
     @Override
     public float getSpeed() {
-        return actualSpeed * actualSpeed * 0.8f;
+        return Math.abs(actualSpeed) > 1 ? actualSpeed * actualSpeed * 0.8f : 0;
     }
 
     @Override
