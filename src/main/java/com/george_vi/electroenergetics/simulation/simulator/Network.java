@@ -230,8 +230,8 @@ public class Network {
         for (CoupledProperties cp : coupledProperties) {
             SimulationNode p1 = builder.getNode(cp.nodes().node1());
             SimulationNode p2 = builder.getNode(cp.nodes().node2());
-            SimulationNode s1 = builder.getNode(cp.coupledNodes().node1());
-            SimulationNode s2 = builder.getNode(cp.coupledNodes().node2());
+            SimulationNode s1 = builder.getNode(cp.coupledNodes().node2());
+            SimulationNode s2 = builder.getNode(cp.coupledNodes().node1());
             if (p1 == null || p2 == null || s1 == null || s2 == null)
                 continue;
 

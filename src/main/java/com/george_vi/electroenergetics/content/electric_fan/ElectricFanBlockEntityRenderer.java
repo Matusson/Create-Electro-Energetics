@@ -23,10 +23,10 @@ public class ElectricFanBlockEntityRenderer extends SmartBlockEntityRenderer<Ele
         Direction facing = blockEntity.getBlockState().getValue(ElectricFanBlock.FACING);
         CachedBuffers.partial(CEEPartialModels.ELECTRIC_FAN_BLADE, state)
                 .light(light)
-                .rotateYCenteredDegrees(facing.getAxis().isHorizontal() ? (int) facing.toYRot() : 0)
                 .rotateXCenteredDegrees(facing == Direction.DOWN ? 180 : facing.getAxis().isHorizontal() ? 270 : 0)
+                .rotateZCenteredDegrees(facing.getAxis().isHorizontal() ? (int) -facing.toYRot() + 180 : 0)
                 .rotateYCenteredDegrees(Mth.lerp(partialTicks, blockEntity.prevRotation, blockEntity.rotation))
-                .translate(0, state.getValue(ElectricFanBlock.FORWARD) ? -6/16f : 0, 0)
+                .translate(0, state.getValue(ElectricFanBlock.FORWARD) ? 6/16f : 0, 0)
                 .renderInto(ms, buffer.getBuffer(RenderType.CUTOUT));
     }
 }

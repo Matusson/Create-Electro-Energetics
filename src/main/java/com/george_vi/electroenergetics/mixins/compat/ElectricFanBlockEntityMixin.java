@@ -52,7 +52,7 @@ public class ElectricFanBlockEntityMixin extends SmartBlockEntity implements Blo
     }
 
     protected float sable$getPropSpeed() {
-        final float rotationSpeed = -actualSpeed * 8;
+        final float rotationSpeed = actualSpeed * 8;
         return this.getBlockDirection().getAxisDirection().getStep() * rotationSpeed * (10 / 3f);
     }
 
