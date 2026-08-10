@@ -1,4 +1,4 @@
-// 1.21.1	2026-07-22T13:52:09.138524652	Registrate Provider for electroenergetics [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (blocks), Tags (enchantments), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
+// 1.21.1	2026-08-07T23:22:04.950331552	Registrate Provider for electroenergetics [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (blocks), Tags (enchantments), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
 efaff624fae8f426c8927b933899a261b68f7685 assets/electroenergetics/blockstates/accumulator.json
 bc7e544079464f9fb40950d4499967da027b352f assets/electroenergetics/blockstates/alternator_brushes.json
 6b72c8deefc1f25685fbb695dfa33f40a78fa5a3 assets/electroenergetics/blockstates/alternator_rotor.json
@@ -16,6 +16,7 @@ a6995eda13a0492b39451685022f5504920179dc assets/electroenergetics/blockstates/bu
 045ef5e48fc1b802f193ad3376981ff8bbd08097 assets/electroenergetics/blockstates/capacitor.json
 33dc22a8cc57bb61e7505e9bf2ee5b6856c16670 assets/electroenergetics/blockstates/catenary_holder.json
 26aa9925a737df60304f5f5924661aa4a3d62cbb assets/electroenergetics/blockstates/concrete_pole.json
+6e49b144309ca22671378758b236e519711b0db0 assets/electroenergetics/blockstates/concrete_pole_strut.json
 222d3b583363e0f023fb9e61512e5edf749fc425 assets/electroenergetics/blockstates/connector.json
 647f9f9ae43449f35f6a6ac7efef26cac5f686c0 assets/electroenergetics/blockstates/converter.json
 0c00844e273dc7e253ba71c93d39a1b27892e08b assets/electroenergetics/blockstates/creative_battery.json
@@ -96,8 +97,8 @@ f407a37a266195fcfc499e4b24ffdb23655d6ed6 assets/electroenergetics/blockstates/wh
 653b26ba9220e3d382341409d1077886f5dad212 assets/electroenergetics/blockstates/white_electrical_panel.json
 08773c07f26e18921d02a6d72d8e5009381faebe assets/electroenergetics/blockstates/yellow_electric_motor.json
 3ee703aa50d72c35efc595a82426b8b342a85b25 assets/electroenergetics/blockstates/yellow_electrical_panel.json
-26215498f7e651c60cd5a4d45864e832cfd2a1fa assets/electroenergetics/lang/en_ud.json
-c6593d83cbe4ffaab9f472b566873c27c0f935e9 assets/electroenergetics/lang/en_us.json
+5ee3567ab765b5443de940adeefa7b38435f18a7 assets/electroenergetics/lang/en_ud.json
+56f6b1fca684832624e330e96b2b717a84416bf1 assets/electroenergetics/lang/en_us.json
 706ea17778dccc4e51f059c39b5c730336b598c6 assets/electroenergetics/models/block/black_electric_motor.json
 c4d97346cc2c5227ea79460ab456d978989a4917 assets/electroenergetics/models/block/black_electric_motor_roll.json
 1492e0e72ff03497c687dc88f5187eedba553d56 assets/electroenergetics/models/block/black_electrical_panel.json
@@ -217,6 +218,7 @@ d3131de26b0c74ca904c559cc9baeb136d38f8ba assets/electroenergetics/models/item/bu
 6d5ab3bd75c6a69e4392525fb2dd10d2eb095c3a assets/electroenergetics/models/item/catenary_holder.json
 892f34ed48bd1f89edba271a65f57a52dc5af449 assets/electroenergetics/models/item/commutator.json
 6b76807e00bbbf80767038a7db1f42ce6445a146 assets/electroenergetics/models/item/concrete_pole.json
+2a6df17819e704f0e4726dbd169953b5d514c69a assets/electroenergetics/models/item/concrete_pole_strut.json
 4130933f938c9ba17c93b7684fcc71827d9b76c1 assets/electroenergetics/models/item/connector.json
 460c2df014cdeb92c6cca3cc2bb20640e1d2a9d7 assets/electroenergetics/models/item/converter.json
 aed7b310df6ccbc8c6c8fd919262df0be3e70030 assets/electroenergetics/models/item/copper_wire.json
@@ -345,6 +347,7 @@ e027b50b521ef743d0b12522181a3a7f7b1def4c data/electroenergetics/loot_table/block
 0e4bcaedb6a73beec742db9637abac834f7027c8 data/electroenergetics/loot_table/blocks/capacitor.json
 aa0574c74156f06c3e2c5fb1b8cf7a61ba5e84e0 data/electroenergetics/loot_table/blocks/catenary_holder.json
 fa50eb47147fa7e1fcb82f92b96592128a4e853f data/electroenergetics/loot_table/blocks/concrete_pole.json
+2403cecaf39a1e49ca45c721e219f86ea80be370 data/electroenergetics/loot_table/blocks/concrete_pole_strut.json
 6e77adadff5e7670eba32084b814220f559f3a10 data/electroenergetics/loot_table/blocks/connector.json
 3e6804c454d879c8319e9d189a1a3f7a51bc98da data/electroenergetics/loot_table/blocks/converter.json
 ae82471c7de0ba6cb72264881a1b328f52e4fb09 data/electroenergetics/loot_table/blocks/creative_battery.json

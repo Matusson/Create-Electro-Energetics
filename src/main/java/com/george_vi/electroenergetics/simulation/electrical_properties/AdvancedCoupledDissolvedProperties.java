@@ -127,7 +127,7 @@ public class AdvancedCoupledDissolvedProperties extends MicroTickingElectricalPr
         double v2 = toFill[originalNodeIDs[originalNodeIDs.length - 1] * totalMicroTicks + microTick];
         double vd = (v1 - v2);
         double current = vd / totalResistance;
-        current -= (currentSource / ratio);
+        current += (currentSource / ratio);
         double currentVoltage = v1;
         for (int i = 0; i < originalResistances.length; i++) {
             int nextNodeID = originalNodeIDs[i + 1];

@@ -230,8 +230,8 @@ public class Network {
         for (CoupledProperties cp : coupledProperties) {
             SimulationNode p1 = builder.getNode(cp.nodes().node1());
             SimulationNode p2 = builder.getNode(cp.nodes().node2());
-            SimulationNode s1 = builder.getNode(cp.coupledNodes().node2());
-            SimulationNode s2 = builder.getNode(cp.coupledNodes().node1());
+            SimulationNode s1 = builder.getNode(cp.coupledNodes().node1());
+            SimulationNode s2 = builder.getNode(cp.coupledNodes().node2());
             if (p1 == null || p2 == null || s1 == null || s2 == null)
                 continue;
 
@@ -284,7 +284,7 @@ public class Network {
             } else if (entry instanceof CoupledPropertiesOptimizationEntry optimization) {
                 double leftPrimary = toFill[optimization.leftPrimary() * totalMicroTicks + microTick];
                 double rightPrimary = toFill[optimization.rightPrimary() * totalMicroTicks + microTick];
-                double voltage = leftPrimary - rightPrimary;
+                double voltage = rightPrimary - leftPrimary;
                 double current = voltage / optimization.replacementResistance();
                 double scaledCurrent = current / optimization.ratio();
                 double scaledVoltage = voltage * optimization.ratio();
@@ -305,7 +305,7 @@ public class Network {
             } else if (entry instanceof AdvancedCoupledPropertiesOptimizationEntry optimization) {
                 double leftPrimary = toFill[optimization.leftPrimary() * totalMicroTicks + microTick];
                 double rightPrimary = toFill[optimization.rightPrimary() * totalMicroTicks + microTick];
-                double voltage = leftPrimary - rightPrimary;
+                double voltage = rightPrimary - leftPrimary;
                 double scaledVoltage = voltage * optimization.ratio();
 
                 // set the origin voltage so it doesn't mess stuff up when a branch is connected to one of the nodes
@@ -316,8 +316,8 @@ public class Network {
                     originVoltage = toFill[optimization.rightNode() * totalMicroTicks + microTick] - scaledVoltage;
                 //
 
-                double v1 = originVoltage;
-                double v2 = originVoltage + scaledVoltage;
+                double v1 = originVoltage - scaledVoltage;
+                double v2 = originVoltage;
                 toFill[optimization.leftNode() * totalMicroTicks + microTick] = v2;
                 toFill[optimization.rightNode() * totalMicroTicks + microTick] = v1;
 
@@ -326,7 +326,8 @@ public class Network {
 
         }
         // Fix grounds - offset the nodes of each network so that ground is at zero volts
-
+        if (true)
+            return;
         double[] currentRegionZeroPotential = builder.currentRegionZeroPotential;
         int[] nodeCurrentRegionID = builder.nodeCurrentRegionID;
         double[] nodeGroundConductance = builder.nodeGroundConductance;
