@@ -1,6 +1,8 @@
 package com.george_vi.electroenergetics;
 
 import com.george_vi.electroenergetics.content.electrical_panel.special_interaction.AnalogPanelAttachmentChangeStatePacket;
+import com.george_vi.electroenergetics.content.electrical_panel.special_interaction.SetMenuPanelAttachmentOptionsPacket;
+import com.george_vi.electroenergetics.content.electrical_panel.special_interaction.SetPanelAttachmentOptionsPacket;
 import com.george_vi.electroenergetics.content.energy_meter.ChangeEnergyMeterStatePacket;
 import com.george_vi.electroenergetics.content.fuse.ConfigureFusePacket;
 import com.george_vi.electroenergetics.content.railway_electrification.catenary.ClearCatenaryPacket;
@@ -47,6 +49,8 @@ public enum CEEPackets implements BasePacketPayload.PacketTypeProvider {
     SYNC_TRAIN_GAUGE_DATA(SyncTrainGaugeDataPacket.class, SyncTrainGaugeDataPacket.STREAM_CODEC),
     CONFIGURE_FUSE(ConfigureFusePacket.class, ConfigureFusePacket.STREAM_CODEC),
     ANALOG_LEVER_PANEL_CHANGE_STATE(AnalogPanelAttachmentChangeStatePacket.class, AnalogPanelAttachmentChangeStatePacket.STREAM_CODEC),
+    SET_MENU_PANEL_ATTACHMENT_OPTIONS(SetMenuPanelAttachmentOptionsPacket.class, SetMenuPanelAttachmentOptionsPacket.STREAM_CODEC),
+    SET_PANEL_ATTACHMENT_OPTIONS(SetPanelAttachmentOptionsPacket.class, SetPanelAttachmentOptionsPacket.STREAM_CODEC),
     ;
 
     private final CatnipPacketRegistry.PacketType<?> type;

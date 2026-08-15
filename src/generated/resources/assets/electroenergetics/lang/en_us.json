@@ -161,6 +161,7 @@
   "electroenergetics.electric_train_sound.modern": "Modern",
   "electroenergetics.electrical_panel_linking.frequency_slot_0": "Freq. #1",
   "electroenergetics.electrical_panel_linking.frequency_slot_1": "Freq. #2",
+  "electroenergetics.electrical_panel_linking.return_to_zero": "Return to zero",
   "electroenergetics.electrical_panel_linking.title": "Linking",
   "electroenergetics.fuse.hold_to_configure": "Hold Left Alt and Scroll to configure",
   "electroenergetics.fuse.set_amperage": "Fuse Amperage:",

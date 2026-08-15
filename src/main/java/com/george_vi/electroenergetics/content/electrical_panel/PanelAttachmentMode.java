@@ -11,7 +11,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.george_vi.electroenergetics.content.electrical_panel.ElectricalPanelSlot.*;
 
@@ -61,7 +62,14 @@ public interface PanelAttachmentMode {
             .addSlot(THIRD_CENTERED).node(8, 11)
             .addSlot(THIRD_LEFT).node(9, 12).build();
 
+    PanelAttachmentMode THIRD_NONE = builder()
+            .addSlot(THIRD_RIGHT)
+            .addSlot(THIRD_CENTERED)
+            .addSlot(THIRD_LEFT).build();
+
     PanelAttachmentMode HALF_OR_THIRD = union(HALF, THIRD);
+
+    PanelAttachmentMode HALF_OR_THIRD_NONE = union(HALF_NONE, THIRD_NONE);
 
     PanelAttachmentMode SIXTH = builder()
             .addSlot(THIRD_RIGHT_BOTTOM).node(131, 31)
@@ -71,7 +79,17 @@ public interface PanelAttachmentMode {
             .addSlot(THIRD_CENTERED_TOP).node(295, 195)
             .addSlot(THIRD_LEFT_TOP).node(299, 199).build();
 
+    PanelAttachmentMode SIXTH_NONE = builder()
+            .addSlot(THIRD_RIGHT_BOTTOM)
+            .addSlot(THIRD_CENTERED_BOTTOM)
+            .addSlot(THIRD_LEFT_BOTTOM)
+            .addSlot(THIRD_RIGHT_TOP)
+            .addSlot(THIRD_CENTERED_TOP)
+            .addSlot(THIRD_LEFT_TOP).build();
+
     PanelAttachmentMode HALF_OR_THIRD_OR_SIXTH = union(HALF_OR_THIRD, SIXTH);
+
+    PanelAttachmentMode HALF_OR_THIRD_OR_SIXTH_NONE = union(HALF_OR_THIRD_NONE, SIXTH_NONE);
 
     PanelAttachmentMode SIXTH_QUAD = builder()
             .addSlot(THIRD_RIGHT_BOTTOM).node(130, 30, 132, 32)

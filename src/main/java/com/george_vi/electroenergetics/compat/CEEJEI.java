@@ -2,8 +2,11 @@ package com.george_vi.electroenergetics.compat;
 
 import com.george_vi.electroenergetics.CEEBlocks;
 import com.george_vi.electroenergetics.CreateElectroEnergetics;
+import com.george_vi.electroenergetics.content.electrical_panel.link.ElectricalPanelLinkScreen;
+import com.simibubi.create.compat.jei.GhostIngredientHandler;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IIngredientAliasRegistration;
 import mezz.jei.library.ingredients.itemStacks.TypedItemStack;
 import net.minecraft.resources.ResourceLocation;
@@ -31,5 +34,11 @@ public class CEEJEI implements IModPlugin {
         registration.addAlias(TypedItemStack.create(CEEBlocks.THREE_PHASE_ALTERNATOR_BRUSHES.asStack()), "generator");
         registration.addAlias(TypedItemStack.create(CEEBlocks.THREE_PHASE_ALTERNATOR_BRUSHES.asStack()), "generator");
 
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public void registerGuiHandlers(IGuiHandlerRegistration registration) {
+        registration.addGhostIngredientHandler(ElectricalPanelLinkScreen.class, new GhostIngredientHandler());
     }
 }

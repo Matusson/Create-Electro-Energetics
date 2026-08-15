@@ -14,6 +14,7 @@
 
     "create:analog_lever",
     "create:turntable",
+    "create:hand_crank",
 
     { "id": "simulated:altitude_sensor", "required": false },
     { "id": "simulated:velocity_sensor", "required": false },

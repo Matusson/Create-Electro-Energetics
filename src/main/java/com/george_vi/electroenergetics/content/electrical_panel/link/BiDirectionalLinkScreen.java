@@ -13,11 +13,11 @@ import org.jetbrains.annotations.NotNull;
 
 import static com.simibubi.create.foundation.gui.AllGuiTextures.PLAYER_INVENTORY;
 
-public class ElectricalPanelLinkScreen extends AbstractLinkScreen<ElectricalPanelLinkMenu> {
-    private final CEEGuiTextures background = CEEGuiTextures.ELECTRICAL_PANEL_LINK;
+public class BiDirectionalLinkScreen extends AbstractLinkScreen<BiDirectionalLinkMenu> {
+    private final CEEGuiTextures background = CEEGuiTextures.BIDIRECTIONAL_LINK;
     private IconButton shouldReturn;
 
-    public ElectricalPanelLinkScreen(ElectricalPanelLinkMenu container, Inventory inv, Component title) {
+    public BiDirectionalLinkScreen(BiDirectionalLinkMenu container, Inventory inv, Component title) {
         super(container, inv, title);
     }
 
@@ -66,6 +66,6 @@ public class ElectricalPanelLinkScreen extends AbstractLinkScreen<ElectricalPane
 
     @Override
     public int slots() {
-        return 2;
+        return 4;
     }
 }
