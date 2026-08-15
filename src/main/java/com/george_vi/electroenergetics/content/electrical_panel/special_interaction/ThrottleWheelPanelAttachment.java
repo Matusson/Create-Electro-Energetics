@@ -89,8 +89,7 @@ public class ThrottleWheelPanelAttachment extends PanelAttachment implements Ele
 
         if (prevRedstoneSignal != redstoneSignal) {
             prevRedstoneSignal = redstoneSignal;
-            updateLinkState(0, Mth.clamp(-redstoneSignal, 0, 15));
-            updateLinkState(1, Mth.clamp(redstoneSignal, 0, 15));
+            updateLinkState(0, Mth.clamp(redstoneSignal, 0, 15));
         }
     }
 
