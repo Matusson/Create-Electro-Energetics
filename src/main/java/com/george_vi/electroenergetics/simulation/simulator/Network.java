@@ -1,5 +1,7 @@
 package com.george_vi.electroenergetics.simulation.simulator;
 
+import com.george_vi.electroenergetics.foundation.nodes.AttachedNode;
+import com.george_vi.electroenergetics.foundation.nodes.InWorldNode;
 import com.george_vi.electroenergetics.simulation.CircuitBuilder;
 import com.george_vi.electroenergetics.simulation.SimulationNode;
 import com.george_vi.electroenergetics.simulation.electrical_properties.*;
@@ -45,7 +47,9 @@ public class Network {
     private static final byte FIXED = 2;
 
     public Network(Collection<SimulationNode> allNodes, CircuitBuilder builder, InfrastructureSavedData sd) {
-        allOriginalNodeIDs = new int[allNodes.size()];
+        // +1 because there is a ground node
+        SimulationNode groundNode = new SimulationNode(new AttachedNode(0, "groundNode"), -1);
+        allOriginalNodeIDs = new int[allNodes.size() + 1];
         int i = 0;
         for (SimulationNode node : allNodes)
             allOriginalNodeIDs[i++] = node.ordinal;

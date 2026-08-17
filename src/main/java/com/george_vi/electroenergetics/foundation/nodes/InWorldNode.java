@@ -71,9 +71,8 @@ public class InWorldNode extends Node implements Comparable<InWorldNode> {
         this(id, new BlockPos(x, y, z));
     }
 
-    public static InWorldNode closestNode(Level level, Vec3 clickedPos, float threshold) {
+    public static InWorldNode closestNode(Level level, Vec3 clickedPos, float threshold, BlockPos pos) {
 
-        BlockPos pos = BlockPos.containing(clickedPos);
         BlockState state = level.getBlockState(pos);
         return closestNode(level, pos, state, threshold, clickedPos);
     }
@@ -326,7 +325,7 @@ public class InWorldNode extends Node implements Comparable<InWorldNode> {
 
         //
 
-        InWorldNode hoveredNode = InWorldNode.closestNode(level, hoveredLocation, 1.5f);
+        InWorldNode hoveredNode = InWorldNode.closestNode(level, hoveredLocation, 1.5f, hitResult.getBlockPos());
         if (hoveredNode == null)
             hoveredNode = InWorldNode.closestNode(level, hoveredPos, level.getBlockState(hoveredPos), 1.5f, hoveredLocation);
 
